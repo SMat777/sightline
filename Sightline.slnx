@@ -1,0 +1,6 @@
+<Solution>
+  <Folder Name="/backend/">
+    <Project Path="backend/Sightline.Api/Sightline.Api.csproj" />
+    <Project Path="backend/Sightline.Tests/Sightline.Tests.csproj" />
+  </Folder>
+</Solution>

@@ -1,0 +1,37 @@
+# --- .NET ---
+bin/
+obj/
+*.user
+*.suo
+.vs/
+# Local app secrets / config overrides (never commit connection strings)
+appsettings.Development.json
+appsettings.Local.json
+*.db
+*.db-shm
+*.db-wal
+
+# --- Node / frontend ---
+node_modules/
+dist/
+dist-ssr/
+*.local
+.vite/
+
+# --- Editor / OS ---
+.vscode/*
+!.vscode/extensions.json
+.idea/
+.DS_Store
+*.swp
+
+# --- Logs ---
+*.log
+npm-debug.log*
+
+# --- Brainstorm scratch (visual companion) ---
+.superpowers/
+
+# --- Internal planning / learning material (kept local, never committed) ---
+docs/
+design/
