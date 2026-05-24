@@ -16,14 +16,19 @@ export default function App() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    // Both views load from the same day; one round-trip each, in parallel.
-    Promise.all([fetchRadar(), fetchCorrelation()])
+    // Abort on unmount / StrictMode re-run so a stale response can't set state.
+    const ctrl = new AbortController();
+    Promise.all([fetchRadar(ctrl.signal), fetchCorrelation(ctrl.signal)])
       .then(([r, c]) => {
         setRadar(r);
         setCorrelation(c);
         setActive(r.zones[0]?.zoneId ?? "");
       })
-      .catch((e: unknown) => setError(e instanceof Error ? e.message : "Ukendt fejl"));
+      .catch((e: unknown) => {
+        if (ctrl.signal.aborted) return; // expected on cleanup, not an error
+        setError(e instanceof Error ? e.message : "Ukendt fejl");
+      });
+    return () => ctrl.abort();
   }, []);
 
   // The radar returns both zones fully, so the tab switch is a local select —
@@ -52,16 +57,27 @@ export default function App() {
       </header>
 
       <main className="wrap">
+        {/* polite announcement so screen-reader users know the data arrived */}
+        <p className="sr-only" aria-live="polite">
+          {zone ? `Dashboard indlæst for zone ${zone.zoneId}.` : ""}
+        </p>
+
         {error && (
           <p className="state err" role="alert">
-            Kunne ikke nå API'et: {error}. Kører backend på :5174?
+            Kunne ikke nå API'et: {error}. Er backend startet?
           </p>
         )}
 
         {!error && !radar && <Skeleton />}
 
         {radar && zone && (
-          <div className="dash">
+          <div
+            className="dash"
+            id="dash-panel"
+            role="tabpanel"
+            aria-labelledby={`tab-${zone.zoneId}`}
+            tabIndex={0}
+          >
             <div className="dash-meta">
               <span className="dash-zone">{zone.zoneId} · {zone.zoneName}</span>
               <span className="dash-date">{zone.date}</span>
