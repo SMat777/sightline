@@ -1,4 +1,5 @@
 import { useState } from "react";
+import type { KeyboardEvent } from "react";
 import type { Hour } from "../types";
 import { krKwh, gCo2, hhmm, hourOf, statusMeta } from "../lib/format";
 
@@ -24,19 +25,29 @@ export default function Ribbon({ hours, bestStart, bestEnd }: Props) {
 
   if (hours.length === 0) return null;
 
-  const maxPrice = Math.max(...hours.map((h) => h.spotPriceDkkKwh), 0.01);
+  const maxPrice = Math.max(...hours.map((h) => h.spotPriceDkkKwh), 0.01); // floor avoids div-by-zero
   const slot = (VB_W - PAD_X * 2) / hours.length;
   const barW = slot * 0.62;
 
-  const startH = bestStart ? Number(bestStart.slice(0, 2)) : null;
-  const endH = bestEnd ? Number(bestEnd.slice(0, 2)) : null;
+  // hourOf handles both "HH:mm" and full ISO, so the highlight survives a format change.
+  const startH = bestStart ? hourOf(bestStart) : null;
+  const endH = bestEnd ? hourOf(bestEnd) : null;
   const inBest = (h: Hour) =>
     startH !== null && endH !== null && hourOf(h.timestamp) >= startH && hourOf(h.timestamp) <= endH;
 
   const x = (i: number) => PAD_X + i * slot + (slot - barW) / 2;
   const barH = (price: number) => Math.max(3, (price / maxPrice) * PLOT_H);
 
+  const clear = (i: number) => setHover((cur) => (cur === i ? null : cur));
+  const onKeyDown = (e: KeyboardEvent<SVGRectElement>) => {
+    if (e.key === "Escape") setHover(null);
+  };
+
   const active = hover !== null ? hours[hover] : null;
+
+  const barLabel = (h: Hour) =>
+    `${hhmm(h.timestamp)}: ${statusMeta[h.status].label}, ${krKwh(h.spotPriceDkkKwh)} kr/kWh, ` +
+    `${gCo2(h.co2IntensityGKwh)} g CO₂, score ${Math.round(h.score)}`;
 
   return (
     <figure className="ribbon-fig">
@@ -66,7 +77,7 @@ export default function Ribbon({ hours, bestStart, bestEnd }: Props) {
           {hours.map((h, i) =>
             inBest(h) ? (
               <rect
-                key={`best-${i}`}
+                key={`best-${h.timestamp}`}
                 x={PAD_X + i * slot}
                 y={PLOT_TOP - 6}
                 width={slot}
@@ -79,12 +90,12 @@ export default function Ribbon({ hours, bestStart, bestEnd }: Props) {
           {/* baseline */}
           <line x1={PAD_X} y1={PLOT_BOT} x2={VB_W - PAD_X} y2={PLOT_BOT} className="ribbon-base" />
 
-          {/* bars */}
+          {/* bars — focusable so keyboard users get the same detail as hover */}
           {hours.map((h, i) => {
             const height = barH(h.spotPriceDkkKwh);
             return (
               <rect
-                key={i}
+                key={h.timestamp}
                 x={x(i)}
                 y={PLOT_BOT - height}
                 width={barW}
@@ -92,8 +103,14 @@ export default function Ribbon({ hours, bestStart, bestEnd }: Props) {
                 rx={2}
                 fill={statusMeta[h.status].color}
                 className={`ribbon-bar${hover === i ? " hot" : ""}`}
+                tabIndex={0}
+                role="img"
+                aria-label={barLabel(h)}
                 onMouseEnter={() => setHover(i)}
-                onMouseLeave={() => setHover((cur) => (cur === i ? null : cur))}
+                onMouseLeave={() => clear(i)}
+                onFocus={() => setHover(i)}
+                onBlur={() => clear(i)}
+                onKeyDown={onKeyDown}
               />
             );
           })}
@@ -101,17 +118,17 @@ export default function Ribbon({ hours, bestStart, bestEnd }: Props) {
           {/* hour axis ticks every 3h */}
           {hours.map((h, i) =>
             hourOf(h.timestamp) % 3 === 0 ? (
-              <text key={`t-${i}`} x={x(i) + barW / 2} y={PLOT_BOT + 22} className="ribbon-tick">
+              <text key={`t-${h.timestamp}`} x={x(i) + barW / 2} y={PLOT_BOT + 22} className="ribbon-tick">
                 {hhmm(h.timestamp)}
               </text>
             ) : null,
           )}
         </svg>
 
-        {active && (
+        {active && hover !== null && (
           <div
             className="ribbon-tip"
-            style={{ left: `${((hover! + 0.5) / hours.length) * 100}%` }}
+            style={{ left: `${((hover + 0.5) / hours.length) * 100}%` }}
           >
             <span className="tip-time">{hhmm(active.timestamp)}</span>
             <span className="tip-row">
