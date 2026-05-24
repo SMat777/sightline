@@ -27,10 +27,13 @@ builder.Services.AddScoped<IRadarService, RadarService>();
 builder.Services.AddCors(options => options.AddPolicy(FrontendCorsPolicy, policy =>
 {
     if (builder.Environment.IsDevelopment())
-        policy.SetIsOriginAllowed(origin => new Uri(origin).IsLoopback)
+        // TryCreate guards against a malformed Origin header throwing.
+        policy.SetIsOriginAllowed(origin =>
+                  Uri.TryCreate(origin, UriKind.Absolute, out var uri) && uri.IsLoopback)
               .AllowAnyHeader()
               .AllowAnyMethod();
     else
+        // Fail-closed: missing config = no cross-origin allowed (not a wildcard).
         policy.WithOrigins(builder.Configuration.GetSection("Cors:AllowedOrigins").Get<string[]>() ?? [])
               .AllowAnyHeader()
               .AllowAnyMethod();
