@@ -24,7 +24,7 @@ export default function KpiStrip({ kpis }: Props) {
   return (
     <div className="kpistrip">
       {stats.map((s) => (
-        <div key={s.label} className="kpi">
+        <div key={s.label} className="kpi" role="group" aria-label={`${s.label}: ${s.value} ${s.unit}. ${s.hint}`}>
           <p className="kpi-label">{s.label}</p>
           <p className="kpi-value">
             {s.value}

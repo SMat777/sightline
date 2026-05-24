@@ -9,7 +9,7 @@ export default function RecommendationCard({ best }: Props) {
   if (!best) {
     return (
       <section className="panel reco reco-empty" aria-label="Anbefaling">
-        <p className="panel-kicker">Anbefaling</p>
+        <h2 className="panel-kicker">Anbefaling</h2>
         <p className="reco-empty-text">Ikke nok data til at finde et vindue endnu.</p>
       </section>
     );
@@ -17,7 +17,7 @@ export default function RecommendationCard({ best }: Props) {
 
   return (
     <section className="panel reco" aria-label="Anbefaling">
-      <p className="panel-kicker">Bedste vindue i dag</p>
+      <h2 className="panel-kicker">Bedste vindue i dag</h2>
       <p className="reco-window">
         <span className="reco-icon" aria-hidden="true">✦</span>
         {best.start}<span className="reco-dash">–</span>{best.end}

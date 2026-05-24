@@ -9,7 +9,7 @@ interface Props {
 export default function AnomalyList({ anomalies }: Props) {
   return (
     <section className="panel anomalies" aria-label="Afvigelser">
-      <p className="panel-kicker">Afvigelser i dag</p>
+      <h2 className="panel-kicker">Afvigelser i dag</h2>
 
       {anomalies.length === 0 ? (
         <p className="anom-empty">
