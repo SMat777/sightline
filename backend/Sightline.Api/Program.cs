@@ -22,10 +22,19 @@ builder.Services.AddScoped<IScoreService, ScoreService>();
 builder.Services.AddScoped<IAnomalyService, AnomalyService>();
 builder.Services.AddScoped<IRadarService, RadarService>();
 
+// Dev: Vite may land on any free local port, so trust loopback only.
+// Prod: lock to explicit origins from config (Cors:AllowedOrigins).
 builder.Services.AddCors(options => options.AddPolicy(FrontendCorsPolicy, policy =>
-    policy.WithOrigins("http://localhost:5173")
-          .AllowAnyHeader()
-          .AllowAnyMethod()));
+{
+    if (builder.Environment.IsDevelopment())
+        policy.SetIsOriginAllowed(origin => new Uri(origin).IsLoopback)
+              .AllowAnyHeader()
+              .AllowAnyMethod();
+    else
+        policy.WithOrigins(builder.Configuration.GetSection("Cors:AllowedOrigins").Get<string[]>() ?? [])
+              .AllowAnyHeader()
+              .AllowAnyMethod();
+}));
 
 var app = builder.Build();
 
