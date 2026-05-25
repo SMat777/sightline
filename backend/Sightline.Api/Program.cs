@@ -1,6 +1,7 @@
 using Sightline.Api.Data;
 using Sightline.Api.Infrastructure;
 using Sightline.Api.Services;
+using Sightline.Api.Services.Engine;
 using Sightline.Api.Services.Sources;
 using Microsoft.EntityFrameworkCore;
 using Scalar.AspNetCore;
@@ -22,6 +23,13 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 builder.Services.AddHttpClient();
 builder.Services.AddScoped<IDataSource, DstConnector>();
 builder.Services.AddScoped<IDataSource, OpenDataDkConnector>();
+
+// Signal engine: each scanner is one signal type; the ranker mixes them.
+builder.Services.AddScoped<ISignalScanner, TrendScanner>();
+builder.Services.AddScoped<ISignalScanner, AnomalyScanner>();
+builder.Services.AddScoped<ISignalScanner, SegmentScanner>();
+builder.Services.AddSingleton<Ranker>();
+builder.Services.AddScoped<ISignalEngine, SignalEngine>();
 
 builder.Services.AddScoped<IEnergyRepository, EnergyRepository>();
 builder.Services.AddScoped<IScoreService, ScoreService>();

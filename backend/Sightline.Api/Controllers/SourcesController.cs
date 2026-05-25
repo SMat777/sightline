@@ -1,5 +1,6 @@
 using Sightline.Api.Domain;
 using Sightline.Api.Dtos;
+using Sightline.Api.Services.Engine;
 using Sightline.Api.Services.Sources;
 using Microsoft.AspNetCore.Mvc;
 
@@ -16,9 +17,13 @@ public class SourcesController : ControllerBase
     };
 
     private readonly IReadOnlyDictionary<string, IDataSource> _sources;
+    private readonly ISignalEngine _engine;
 
-    public SourcesController(IEnumerable<IDataSource> sources) =>
+    public SourcesController(IEnumerable<IDataSource> sources, ISignalEngine engine)
+    {
         _sources = sources.ToDictionary(s => s.Source);
+        _engine = engine;
+    }
 
     // GET /api/sources — connectable data sources.
     [HttpGet("sources")]
@@ -44,6 +49,32 @@ public class SourcesController : ControllerBase
         if (!_sources.TryGetValue(source, out var s)) return NotFound();
         var ds = await s.FetchAsync(id, ct);
         return Ok(ToProfileDto(ds));
+    }
+
+    // GET /api/findings/{source}/{id} — fetch, profile, scan, rank.
+    [HttpGet("findings/{source}/{id}")]
+    [ProducesResponseType<IReadOnlyList<FindingDto>>(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> Findings(string source, string id, CancellationToken ct)
+    {
+        if (!_sources.TryGetValue(source, out var s)) return NotFound();
+        var ds = await s.FetchAsync(id, ct);
+        return Ok(_engine.Scan(ds).Select(ToFindingDto));
+    }
+
+    private static FindingDto ToFindingDto(Finding f)
+    {
+        var i = f.Interessanthed;
+        return new FindingDto(
+            f.Type.ToString(),
+            f.Overskrift,
+            new InterestingnessDto(
+                Math.Round(i.Score, 3), Math.Round(i.Styrke, 3), Math.Round(i.Overraskelse, 3),
+                Math.Round(i.Sikkerhed, 3), Math.Round(i.Daekning, 3)),
+            new EvidenceDto(
+                f.Bevis.Viz,
+                f.Bevis.Points.Select(p => new EvidencePointDto(p.Label, p.Value)).ToList(),
+                f.Bevis.HighlightIndex));
     }
 
     private static DatasetProfileDto ToProfileDto(Dataset ds)
