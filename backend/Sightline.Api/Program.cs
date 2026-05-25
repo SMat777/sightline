@@ -28,6 +28,8 @@ builder.Services.AddScoped<IDataSource, OpenDataDkConnector>();
 builder.Services.AddScoped<ISignalScanner, TrendScanner>();
 builder.Services.AddScoped<ISignalScanner, AnomalyScanner>();
 builder.Services.AddScoped<ISignalScanner, SegmentScanner>();
+builder.Services.AddScoped<ISignalScanner, CorrelationScanner>();
+builder.Services.AddScoped<ISignalScanner, ConcentrationScanner>();
 builder.Services.AddSingleton<Ranker>();
 builder.Services.AddScoped<ISignalEngine, SignalEngine>();
 

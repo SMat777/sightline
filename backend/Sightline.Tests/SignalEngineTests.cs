@@ -43,6 +43,23 @@ public class SignalEngineTests
         return new Dataset("t:x", "test", "x", cols, rows);
     }
 
+    // Two measure columns, perfectly correlated (y = 2x + 1).
+    private static Dataset TwoMeasures(int n)
+    {
+        var cols = new List<Column>
+        {
+            new("x", ColumnRole.Maal, ColumnType.Number, n, 0),
+            new("y", ColumnRole.Maal, ColumnType.Number, n, 0),
+        };
+        var rows = Enumerable.Range(0, n)
+            .Select(i => (IReadOnlyDictionary<string, object?>)new Dictionary<string, object?>
+            {
+                ["x"] = (double)i, ["y"] = (double)(2 * i + 1),
+            })
+            .ToList();
+        return new Dataset("t:x", "test", "x", cols, rows);
+    }
+
     [Fact]
     public void Trend_DetectsRise()
     {
@@ -70,6 +87,23 @@ public class SignalEngineTests
             .Single();
         Assert.Equal(FindingType.Segment, f.Type);
         Assert.Contains("D", f.Overskrift);
+    }
+
+    [Fact]
+    public void Correlation_DetectsStrongPair()
+    {
+        var f = new CorrelationScanner().Scan(TwoMeasures(12)).Single();
+        Assert.Equal(FindingType.Korrelation, f.Type);
+        Assert.Contains("følges ad", f.Overskrift);
+    }
+
+    [Fact]
+    public void Concentration_FlagsSkew()
+    {
+        var f = new ConcentrationScanner()
+            .Scan(CrossSection([("A", 1000), ("B", 10), ("C", 10), ("D", 10), ("E", 10), ("F", 10)]))
+            .Single();
+        Assert.Equal(FindingType.Koncentration, f.Type);
     }
 
     [Fact]
