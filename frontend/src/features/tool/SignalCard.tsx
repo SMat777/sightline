@@ -57,10 +57,44 @@ function Bars({ ev, label }: { ev: Evidence; label: string }) {
   );
 }
 
+function Scatter({ ev, label }: { ev: Evidence; label: string }) {
+  const xs = ev.points.map((p) => Number(p.label));
+  const ys = ev.points.map((p) => p.value);
+  const xmin = Math.min(...xs), xmax = Math.max(...xs);
+  const ymin = Math.min(...ys), ymax = Math.max(...ys);
+  const sx = (v: number) => P + ((v - xmin) / (xmax - xmin || 1)) * (W - 2 * P);
+  const sy = (v: number) => H - P - ((v - ymin) / (ymax - ymin || 1)) * (H - 2 * P);
+
+  return (
+    <svg className="miniviz" viewBox={`0 0 ${W} ${H}`} role="img" aria-label={label}>
+      {ev.points.map((p, i) => (
+        <circle key={i} cx={sx(Number(p.label))} cy={sy(p.value)} r="3.4" fill={OLIVE} opacity="0.72" />
+      ))}
+    </svg>
+  );
+}
+
+function Pareto({ ev, label }: { ev: Evidence; label: string }) {
+  const x = (i: number) => P + (i / Math.max(1, ev.points.length - 1)) * (W - 2 * P);
+  const y = (cumPct: number) => H - P - (cumPct / 100) * (H - 2 * P);
+  const d = ev.points.map((p, i) => `${i ? "L" : "M"}${x(i).toFixed(1)} ${y(p.value).toFixed(1)}`).join(" ");
+
+  return (
+    <svg className="miniviz" viewBox={`0 0 ${W} ${H}`} role="img" aria-label={label}>
+      <line x1={P} y1={y(80)} x2={W - P} y2={y(80)} stroke={TAN} strokeWidth="1.5" strokeDasharray="6 4" />
+      <path d={d} fill="none" stroke={OLIVE} strokeWidth="2.6" strokeLinejoin="round" strokeLinecap="round" />
+    </svg>
+  );
+}
+
 function MiniViz({ finding }: { finding: Finding }) {
   const label = `Bevis for: ${finding.overskrift}`;
-  if (finding.bevis.viz === "bars") return <Bars ev={finding.bevis} label={label} />;
-  return <Sparkline ev={finding.bevis} anomaly={finding.type === "Anomali"} label={label} />;
+  switch (finding.bevis.viz) {
+    case "bars": return <Bars ev={finding.bevis} label={label} />;
+    case "scatter": return <Scatter ev={finding.bevis} label={label} />;
+    case "pareto": return <Pareto ev={finding.bevis} label={label} />;
+    default: return <Sparkline ev={finding.bevis} anomaly={finding.type === "Anomali"} label={label} />;
+  }
 }
 
 const pct = (n: number) => `${Math.round(n * 100)}%`;
