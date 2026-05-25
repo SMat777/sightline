@@ -1,9 +1,10 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { fetchSources, fetchDatasets, fetchProfile, fetchFindings } from "../../tool-api";
-import type { Source, DatasetRef, DatasetProfile, Finding } from "../../tool-types";
+import type { Source, DatasetRef, DatasetProfile, Finding, FindingType } from "../../tool-types";
 import DataProfileStrip from "./DataProfileStrip";
 import DataShape from "./DataShape";
 import SignalCard from "./SignalCard";
+import LensSelector, { type Bias } from "./LensSelector";
 import "./riso.css";
 
 const roleLabel: Record<string, string> = {
@@ -19,6 +20,8 @@ export default function ToolView() {
   const [results, setResults] = useState<DatasetRef[]>([]);
   const [profile, setProfile] = useState<DatasetProfile | null>(null);
   const [findings, setFindings] = useState<Finding[]>([]);
+  const [lensType, setLensType] = useState<FindingType | "alle">("alle");
+  const [bias, setBias] = useState<Bias>("rang");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const load = useRef<AbortController | null>(null);
@@ -66,6 +69,8 @@ export default function ToolView() {
     setLoading(true);
     setError(null);
     setFindings([]);
+    setLensType("alle");
+    setBias("rang");
     try {
       const [p, f] = await Promise.all([
         fetchProfile(src, id, ctrl.signal),
@@ -88,6 +93,19 @@ export default function ToolView() {
     searchRef.current?.focus();
     searchRef.current?.select();
   }
+
+  const typesPresent = useMemo(
+    () => [...new Set(findings.map((f) => f.type))],
+    [findings],
+  );
+  const displayed = useMemo(() => {
+    const list = lensType === "alle" ? findings : findings.filter((f) => f.type === lensType);
+    if (bias === "overraskelse")
+      return [...list].sort((a, b) => b.interessanthed.overraskelse - a.interessanthed.overraskelse);
+    if (bias === "sikkerhed")
+      return [...list].sort((a, b) => b.interessanthed.sikkerhed - a.interessanthed.sikkerhed);
+    return list;
+  }, [findings, lensType, bias]);
 
   const sourceName = sources.find((s) => s.id === source)?.name ?? source;
   const activeId = profile?.id.split(":").slice(1).join(":") ?? null;
@@ -198,16 +216,27 @@ export default function ToolView() {
               <h2>Mest interessante fund</h2>
               <span className="meta">{findings.length} signaler · rangeret</span>
             </div>
-            <div className="feed">
-              <SignalCard finding={findings[0]} rank={1} hero />
-              {findings.length > 1 && (
-                <div className="feed-grid">
-                  {findings.slice(1).map((f, idx) => (
-                    <SignalCard key={`${f.type}-${idx}`} finding={f} rank={idx + 2} />
-                  ))}
-                </div>
-              )}
-            </div>
+
+            <LensSelector
+              types={typesPresent}
+              activeType={lensType}
+              onType={setLensType}
+              bias={bias}
+              onBias={setBias}
+            />
+
+            {displayed.length > 0 && (
+              <div className="feed">
+                <SignalCard finding={displayed[0]} rank={1} hero />
+                {displayed.length > 1 && (
+                  <div className="feed-grid">
+                    {displayed.slice(1).map((f, idx) => (
+                      <SignalCard key={`${f.type}-${idx}`} finding={f} rank={idx + 2} />
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
           </section>
         )}
 
