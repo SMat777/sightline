@@ -1,0 +1,37 @@
+/* Risograph "Olive Dune" C1 ("Hør & Mos") — locked 2026-05-25.
+   Series cycle olive/tan/gold only; orange is reserved 100% for anomalies. */
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=DM+Mono:wght@400;500&display=swap');
+
+.riso {
+  --paper: #f3eddc;
+  --paper2: #ebe2cc;
+  --ink: #232319;
+  --hair: rgba(35, 35, 25, 0.27);
+  --olive: #5c6a38;
+  --tan: #93733a;
+  --gold: #bf9c45;
+  --ano: #df5a1e;
+  --ano-deep: #a3380e;
+  --hi: #d59a2c;
+
+  background: var(--paper);
+  color: var(--ink);
+  font-family: 'Space Grotesk', system-ui, sans-serif;
+  font-feature-settings: 'tnum' 1;
+}
+
+.riso .mono {
+  font-family: 'DM Mono', ui-monospace, monospace;
+}
+
+/* the six series cycle these three (+ dash); orange never appears as a series */
+.riso .s1 { color: var(--olive); }
+.riso .s2 { color: var(--tan); }
+.riso .s3 { color: var(--gold); }
+
+/* signal-type stamp colours — orange ONLY for anomaly */
+.riso .stamp-anomali { background: var(--ano); color: #fff; }
+.riso .stamp-trend { background: var(--olive); color: #fff; }
+.riso .stamp-korrelation { background: var(--tan); color: #fff; }
+.riso .stamp-segment { background: var(--gold); color: var(--ink); }
+.riso .stamp-koncentration { background: var(--ink); color: var(--paper); }
