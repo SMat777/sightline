@@ -3,6 +3,7 @@ using Sightline.Api.Dtos;
 using Sightline.Api.Services.Engine;
 using Sightline.Api.Services.Sources;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Caching.Memory;
 
 namespace Sightline.Api.Controllers;
 
@@ -18,11 +19,23 @@ public class SourcesController : ControllerBase
 
     private readonly IReadOnlyDictionary<string, IDataSource> _sources;
     private readonly ISignalEngine _engine;
+    private readonly IMemoryCache _cache;
 
-    public SourcesController(IEnumerable<IDataSource> sources, ISignalEngine engine)
+    public SourcesController(IEnumerable<IDataSource> sources, ISignalEngine engine, IMemoryCache cache)
     {
         _sources = sources.ToDictionary(s => s.Source);
         _engine = engine;
+        _cache = cache;
+    }
+
+    // Profile and findings for the same dataset share one live fetch (10 min TTL).
+    private async Task<Dataset> GetDatasetAsync(IDataSource s, string source, string id, CancellationToken ct)
+    {
+        var key = $"ds:{source}:{id}";
+        if (_cache.TryGetValue(key, out Dataset? cached) && cached is not null) return cached;
+        var ds = await s.FetchAsync(id, ct);
+        _cache.Set(key, ds, TimeSpan.FromMinutes(10));
+        return ds;
     }
 
     // GET /api/sources — connectable data sources.
@@ -47,7 +60,7 @@ public class SourcesController : ControllerBase
     public async Task<IActionResult> Profile(string source, string id, CancellationToken ct)
     {
         if (!_sources.TryGetValue(source, out var s)) return NotFound();
-        var ds = await s.FetchAsync(id, ct);
+        var ds = await GetDatasetAsync(s, source, id, ct);
         return Ok(ToProfileDto(ds));
     }
 
@@ -58,7 +71,7 @@ public class SourcesController : ControllerBase
     public async Task<IActionResult> Findings(string source, string id, CancellationToken ct)
     {
         if (!_sources.TryGetValue(source, out var s)) return NotFound();
-        var ds = await s.FetchAsync(id, ct);
+        var ds = await GetDatasetAsync(s, source, id, ct);
         return Ok(_engine.Scan(ds).Select(ToFindingDto));
     }
 

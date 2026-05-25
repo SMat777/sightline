@@ -21,6 +21,7 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 
 // Connectors call public APIs (DST, Open Data DK) over a pooled HttpClient.
 builder.Services.AddHttpClient();
+builder.Services.AddMemoryCache();
 builder.Services.AddScoped<IDataSource, DstConnector>();
 builder.Services.AddScoped<IDataSource, OpenDataDkConnector>();
 
