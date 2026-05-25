@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { fetchSources, fetchDatasets, fetchProfile } from "../../tool-api";
 import type { Source, DatasetRef, DatasetProfile } from "../../tool-types";
 import DataProfileStrip from "./DataProfileStrip";
+import DataShape from "./DataShape";
 import "./riso.css";
 
 const roleLabel: Record<string, string> = {
@@ -19,10 +20,12 @@ export default function ToolView() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const load = useRef<AbortController | null>(null);
+  const searchRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     const ctrl = new AbortController();
     fetchSources(ctrl.signal).then(setSources).catch(() => {});
+    runSearch();
     loadProfile(source, "FOLK1A");
     return () => ctrl.abort();
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -53,7 +56,16 @@ export default function ToolView() {
     }
   }
 
+  function newAnalysis() {
+    document.getElementById("kilde")?.scrollIntoView({ behavior: "smooth", block: "start" });
+    searchRef.current?.focus();
+    searchRef.current?.select();
+  }
+
   const sourceName = sources.find((s) => s.id === source)?.name ?? source;
+  const activeId = profile?.id.split(":").slice(1).join(":") ?? null;
+  const shown = results.slice(0, 8);
+  const more = results.length - shown.length;
 
   return (
     <div className="riso">
@@ -68,11 +80,11 @@ export default function ToolView() {
           </a>
           <div className="menu">
             <a href="#top" aria-current="page">Dashboard</a>
-            <a href="#top">Workflow</a>
-            <a href="#top">Reports</a>
+            <a href="#profil">Profil</a>
+            <a href="#kolonner">Kolonner</a>
           </div>
           <span className="spacer" />
-          <button className="btn" type="button">
+          <button className="btn" type="button" onClick={newAnalysis}>
             Ny analyse
             <svg className="ar" viewBox="0 0 16 16" aria-hidden="true">
               <path d="M3 8h10M9 4l4 4-4 4" />
@@ -96,7 +108,7 @@ export default function ToolView() {
           </div>
         </div>
 
-        <div className="controls" role="group" aria-label="Vælg datakilde og datasæt">
+        <div className="controls" id="kilde" role="group" aria-label="Vælg datakilde og datasæt">
           <span className="tag lab">Kilde</span>
           <select
             className="mono"
@@ -109,6 +121,7 @@ export default function ToolView() {
             ))}
           </select>
           <input
+            ref={searchRef}
             className="mono"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
@@ -119,17 +132,27 @@ export default function ToolView() {
           <button className="go" type="button" onClick={runSearch}>Søg</button>
         </div>
 
-        {results.length > 0 && (
-          <ul className="ds-list">
-            {results.map((r) => (
-              <li key={r.id}>
-                <button className="ds-item" onClick={() => loadProfile(source, r.id)}>
-                  <span className="ds-id">{r.id}</span>
-                  <span className="ds-title">{r.title}</span>
-                </button>
-              </li>
-            ))}
-          </ul>
+        {shown.length > 0 && (
+          <>
+            <ul className="ds-list">
+              {shown.map((r) => (
+                <li key={r.id}>
+                  <button
+                    className={`ds-item${r.id === activeId ? " active" : ""}`}
+                    aria-current={r.id === activeId ? "true" : undefined}
+                    onClick={() => loadProfile(source, r.id)}
+                  >
+                    <span className="ds-id">{r.id}</span>
+                    <span className="ds-title">{r.title}</span>
+                    {r.id === activeId && <span className="ds-cur mono">vist ▸</span>}
+                  </button>
+                </li>
+              ))}
+            </ul>
+            {more > 0 && (
+              <p className="ds-more mono">+ {more} flere — forfin søgningen for at indsnævre.</p>
+            )}
+          </>
         )}
 
         {error && (
@@ -141,39 +164,51 @@ export default function ToolView() {
         {loading && <p className="tool-loading">Henter &amp; profilerer…</p>}
 
         {profile && !loading && (
-          <section aria-live="polite">
-            <div className="sh">
-              <span className="no">01</span>
-              <h2>{profile.title}</h2>
-              <span className="meta">{profile.id}</span>
-            </div>
+          <>
+            <section id="profil" className="rise" aria-live="polite">
+              <div className="sh">
+                <span className="no">01</span>
+                <h2>{profile.title}</h2>
+                <span className="meta">{profile.id}</span>
+              </div>
 
-            <DataProfileStrip profile={profile} />
+              <DataProfileStrip profile={profile} />
 
-            <div className="tablecard" style={{ marginTop: 18 }}>
-              <table>
-                <caption>Kolonner og deres udledte roller</caption>
-                <thead>
-                  <tr>
-                    <th scope="col">Kolonne</th>
-                    <th scope="col">Rolle</th>
-                    <th scope="col">Type</th>
-                    <th scope="col">Distinkte</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {profile.columns.map((c) => (
-                    <tr key={c.name}>
-                      <td className="mono">{c.name}</td>
-                      <td><span className={`pill role-${c.role.toLowerCase()}`}>{roleLabel[c.role]}</span></td>
-                      <td className="mono">{c.type}</td>
-                      <td className="num tnum">{c.cardinality}</td>
+              <h3 className="block-lab">Datasættets form — distinkte værdier pr. kolonne</h3>
+              <DataShape profile={profile} />
+            </section>
+
+            <section id="kolonner" className="rise">
+              <div className="sh">
+                <span className="no">02</span>
+                <h2>Kolonner &amp; roller</h2>
+                <span className="meta">udledt ved profilering</span>
+              </div>
+              <div className="tablecard">
+                <table>
+                  <caption>Hver kolonnes udledte rolle, type og antal distinkte værdier</caption>
+                  <thead>
+                    <tr>
+                      <th scope="col">Kolonne</th>
+                      <th scope="col">Rolle</th>
+                      <th scope="col">Type</th>
+                      <th scope="col" className="num">Distinkte</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </section>
+                  </thead>
+                  <tbody>
+                    {profile.columns.map((c) => (
+                      <tr key={c.name}>
+                        <td className="mono">{c.name}</td>
+                        <td><span className={`pill role-${c.role.toLowerCase()}`}>{roleLabel[c.role]}</span></td>
+                        <td className="mono">{c.type}</td>
+                        <td className="num tnum">{c.cardinality.toLocaleString("da-DK")}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </section>
+          </>
         )}
 
         <footer>

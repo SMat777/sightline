@@ -97,8 +97,29 @@ body { background: #f3eddc; }
   background: transparent; border: 2px solid var(--ink); padding: 9px 13px; cursor: pointer;
   color: var(--ink); transition: transform 0.15s ease; }
 .riso .ds-item:hover { transform: translate(-2px, -2px); background: var(--paper-2); }
+.riso .ds-item.active { background: var(--p1); color: #fff; }
+.riso .ds-item.active .ds-id { color: #e7ddca; }
 .riso .ds-id { font-family: "DM Mono", monospace; font-size: 11px; color: var(--p2); min-width: 86px; }
 .riso .ds-title { font-size: 14px; }
+.riso .ds-cur { margin-left: auto; font-size: 11px; }
+.riso .ds-more { font-family: "DM Mono", monospace; font-size: 11.5px; color: var(--p2); margin-top: 10px; }
+.riso .block-lab { font-family: "DM Mono", monospace; font-size: 11px; letter-spacing: 0.08em;
+  text-transform: uppercase; color: var(--p2); margin: 22px 0 12px; }
+
+/* data shape — distinct values per column */
+.riso .shape { display: grid; gap: 8px; }
+.riso .shape-row { display: grid; grid-template-columns: 150px 1fr 64px; align-items: center; gap: 12px; }
+.riso .shape-name { font-size: 12px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.riso .shape-track { height: 16px; background: var(--paper-2); border: 2px solid var(--ink); }
+.riso .shape-bar { display: block; height: 100%; }
+.riso .shape-maal { background: var(--p1); }
+.riso .shape-dimension { background: var(--hi); }
+.riso .shape-tid { background: var(--p2); }
+.riso .shape-val { text-align: right; font-size: 12px; }
+
+/* entrance (reduced-motion aware below) */
+.riso .rise { opacity: 0; transform: translateY(10px); animation: riso-rise 0.5s ease forwards; }
+@keyframes riso-rise { to { opacity: 1; transform: none; } }
 
 /* ---------- KPI row (profile stats) ---------- */
 .riso .kpis { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin: 18px 0 8px; }
@@ -162,4 +183,5 @@ body { background: #f3eddc; }
 }
 @media (prefers-reduced-motion: reduce) {
   .riso * { animation: none !important; transition: none !important; }
+  .riso .rise { opacity: 1; transform: none; }
 }
