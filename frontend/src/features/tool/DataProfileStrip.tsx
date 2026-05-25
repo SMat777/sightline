@@ -1,23 +1,32 @@
 import type { DatasetProfile } from "../../tool-types";
 
-// The calm "what am I looking at" line above the feed.
+// The "what am I looking at" KPI row, in the locked dashboard's frame language.
 export default function DataProfileStrip({ profile }: { profile: DatasetProfile }) {
   const dims = profile.columns.filter((c) => c.role === "Dimension").length;
   const maal = profile.columns.filter((c) => c.role === "Maal").length;
 
+  let years = "—";
+  if (profile.period) {
+    const [start, end] = profile.period.split(" – ");
+    years = end ? `${start.slice(0, 4)}–${end.slice(0, 4)}` : start;
+  }
+
+  const cards = [
+    { lab: "Rækker", v: profile.rowCount.toLocaleString("da-DK"), meta: "datapunkter" },
+    { lab: "Dimensioner", v: String(dims), meta: "at segmentere på" },
+    { lab: "Mål", v: String(maal), meta: "at måle" },
+    { lab: "Periode", v: years, meta: profile.period ?? "uden tidsakse" },
+  ];
+
   return (
-    <div className="strip mono" aria-label="Datasæt-profil">
-      <span className="strip-stat"><b>{profile.rowCount.toLocaleString("da-DK")}</b> rækker</span>
-      <span className="strip-sep" aria-hidden="true">·</span>
-      <span className="strip-stat"><b>{dims}</b> dimensioner</span>
-      <span className="strip-sep" aria-hidden="true">·</span>
-      <span className="strip-stat"><b>{maal}</b> mål</span>
-      {profile.period && (
-        <>
-          <span className="strip-sep" aria-hidden="true">·</span>
-          <span className="strip-stat">{profile.period}</span>
-        </>
-      )}
+    <div className="kpis" aria-label="Datasæt-profil">
+      {cards.map((k) => (
+        <div className="kpi" key={k.lab}>
+          <div className="tag">{k.lab}</div>
+          <div className="v tnum">{k.v}</div>
+          <div className="meta tnum">{k.meta}</div>
+        </div>
+      ))}
     </div>
   );
 }

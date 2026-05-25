@@ -1,85 +1,165 @@
 /* Risograph "Olive Dune" C1 ("Hør & Mos") — locked 2026-05-25.
-   Series cycle olive/tan/gold only; orange is reserved 100% for anomalies. */
-@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=DM+Mono:wght@400;500&display=swap');
+   Full visual system ported from design/dna-graphic-3-risograph-dashboard.html.
+   Bold riso geometry: 2px ink frames, solid spot inks, DM Mono labels, dashed
+   dividers. Series cycle olive/tan/gold; ORANGE reserved 100% for anomalies.
+   All rules scoped under .riso to avoid clashing with the energy app's index.css. */
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=DM+Mono:wght@400;500&display=swap');
+
+/* self-contained reset — the tool no longer shares the energy app's index.css */
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
 
 .riso {
   --paper: #f3eddc;
-  --paper2: #ebe2cc;
+  --paper-2: #ebe2cc;
   --ink: #232319;
+  --p1: #5c6a38;       /* olive — primary data ink + primary UI accent */
+  --p2: #93733a;       /* tan   — secondary series */
+  --p3: #bf9c45;       /* gold  — tertiary series */
+  --ano: #df5a1e;      /* orange — anomaly marks on paper */
+  --ano-deep: #a3380e; /* deep orange — white text on fill (AA) */
+  --hi: #d59a2c;       /* honey — highlight ink */
   --hair: rgba(35, 35, 25, 0.27);
-  --olive: #5c6a38;
-  --tan: #93733a;
-  --gold: #bf9c45;
-  --ano: #df5a1e;
-  --ano-deep: #a3380e;
-  --hi: #d59a2c;
 
+  min-height: 100vh;
   background: var(--paper);
   color: var(--ink);
-  font-family: 'Space Grotesk', system-ui, sans-serif;
-  font-feature-settings: 'tnum' 1;
+  font-family: "Space Grotesk", system-ui, sans-serif;
+  line-height: 1.4;
+  -webkit-font-smoothing: antialiased;
 }
+/* kill the two-tone edge: the page behind .riso is the same linen */
+body { background: #f3eddc; }
 
-.riso .mono {
-  font-family: 'DM Mono', ui-monospace, monospace;
+.riso .wrap { max-width: 1180px; margin: 0 auto; padding: 0 34px; }
+.riso .mono { font-family: "DM Mono", monospace; }
+.riso .tnum { font-variant-numeric: tabular-nums; font-feature-settings: "tnum" 1; }
+.riso .tag { font-family: "DM Mono", monospace; font-size: 11px; letter-spacing: 0.12em;
+  text-transform: uppercase; color: var(--ink); }
+.riso :focus-visible { outline: 3px solid var(--ano); outline-offset: 3px; }
+
+/* ---------- top app nav ---------- */
+.riso .nav { position: sticky; top: 0; z-index: 120; background: var(--paper);
+  border-bottom: 2px solid var(--ink); }
+.riso .nav::after { content: ""; position: absolute; left: 0; right: 0; bottom: -5px;
+  height: 3px; background: var(--hi); }
+.riso .nav .row { display: flex; align-items: center; gap: 26px;
+  max-width: 1180px; margin: 0 auto; padding: 13px 34px; }
+.riso .mark { display: flex; align-items: center; gap: 10px; font-weight: 700;
+  font-size: 18px; letter-spacing: -0.02em; text-decoration: none; color: var(--ink); }
+.riso .mark .glyph { width: 26px; height: 26px; display: block; }
+.riso .mark .glyph .a { fill: var(--p1); }
+.riso .mark .glyph .b { fill: var(--ano); }
+.riso .mark small { font-family: "DM Mono", monospace; font-size: 10px; letter-spacing: 0.14em;
+  color: var(--p1); font-weight: 500; align-self: flex-end; padding-bottom: 2px; }
+.riso .menu { display: flex; gap: 4px; margin-left: 6px; }
+.riso .menu a { font-family: "DM Mono", monospace; font-size: 13px; text-transform: uppercase;
+  letter-spacing: 0.08em; text-decoration: none; padding: 7px 13px; border: 2px solid transparent;
+  color: var(--ink); min-height: 40px; display: flex; align-items: center; cursor: pointer; }
+.riso .menu a:hover { border-color: var(--hair); }
+.riso .menu a[aria-current="page"] { border: 2px solid var(--ink); background: var(--p1); color: #fff; }
+.riso .nav .spacer { flex: 1; }
+.riso .btn { font-family: "DM Mono", monospace; font-size: 13px; text-transform: uppercase;
+  letter-spacing: 0.08em; text-decoration: none; border: 2px solid var(--ink);
+  background: var(--ano-deep); color: #fff; padding: 9px 16px; display: inline-flex;
+  align-items: center; gap: 8px; min-height: 42px; cursor: pointer; transition: transform 0.18s ease; }
+.riso .btn:hover { transform: translate(-2px, -2px); }
+.riso .btn .ar { width: 15px; height: 15px; flex: none; }
+.riso .btn .ar path { stroke: #fff; stroke-width: 2.4; fill: none; }
+
+/* ---------- hero ---------- */
+.riso .hero { padding: 34px 0 12px; }
+.riso .hero h1 { font-size: clamp(40px, 8vw, 92px); font-weight: 700; line-height: 0.86;
+  letter-spacing: -0.03em; color: var(--p1); }
+.riso .hero .sub { display: flex; flex-wrap: wrap; gap: 10px 26px; align-items: baseline; margin-top: 18px; }
+.riso .hero .sub p { max-width: 56ch; font-size: 15px; }
+.riso .live { font-family: "DM Mono", monospace; font-size: 11px; letter-spacing: 0.1em;
+  text-transform: uppercase; border: 2px solid var(--ink); padding: 4px 9px;
+  display: inline-flex; align-items: center; gap: 7px; }
+.riso .live .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--p1); }
+
+/* ---------- controls bar ---------- */
+.riso .controls { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin: 24px 0 4px; }
+.riso .controls .lab { margin-right: 4px; }
+.riso .controls select, .riso .controls input {
+  font-family: "DM Mono", monospace; font-size: 13px; padding: 8px 12px;
+  border: 2px solid var(--ink); background: var(--paper-2); color: var(--ink); min-height: 42px; }
+.riso .controls input { flex: 1; min-width: 200px; }
+.riso .controls input::placeholder { color: var(--p2); }
+.riso .controls .go { font-family: "DM Mono", monospace; font-size: 13px; text-transform: uppercase;
+  letter-spacing: 0.08em; border: 2px solid var(--ink); background: var(--p1); color: #fff;
+  padding: 9px 18px; min-height: 42px; cursor: pointer; transition: transform 0.15s ease; }
+.riso .controls .go:hover { transform: translate(-2px, -2px); }
+
+/* ---------- dataset results ---------- */
+.riso .ds-list { list-style: none; margin: 14px 0 0; padding: 0; display: grid; gap: 6px; }
+.riso .ds-item { width: 100%; text-align: left; display: flex; gap: 12px; align-items: baseline;
+  background: transparent; border: 2px solid var(--ink); padding: 9px 13px; cursor: pointer;
+  color: var(--ink); transition: transform 0.15s ease; }
+.riso .ds-item:hover { transform: translate(-2px, -2px); background: var(--paper-2); }
+.riso .ds-id { font-family: "DM Mono", monospace; font-size: 11px; color: var(--p2); min-width: 86px; }
+.riso .ds-title { font-size: 14px; }
+
+/* ---------- KPI row (profile stats) ---------- */
+.riso .kpis { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin: 18px 0 8px; }
+.riso .kpi { border: 2px solid var(--ink); padding: 16px; position: relative; background: transparent; }
+.riso .kpi .v { font-size: clamp(26px, 3vw, 36px); font-weight: 700; margin-top: 8px;
+  color: var(--p1); line-height: 1; }
+.riso .kpi .meta { font-family: "DM Mono", monospace; font-size: 11px; margin-top: 8px; color: var(--ink); }
+.riso .kpi .chip-c { position: absolute; top: -11px; right: 12px; background: var(--hi);
+  padding: 2px 8px; font-size: 10px; border: 2px solid var(--ink);
+  font-family: "DM Mono", monospace; letter-spacing: 0.08em; }
+
+/* ---------- section frame ---------- */
+.riso section { padding: 34px 0; border-top: 2px dashed var(--ink); }
+.riso .sh { display: flex; align-items: baseline; gap: 14px; margin-bottom: 22px; }
+.riso .sh .no { font-family: "DM Mono", monospace; font-size: 14px; background: var(--p1);
+  color: #fff; padding: 3px 9px; }
+.riso .sh.alert .no { background: var(--ano-deep); }
+.riso .sh h2 { font-size: 24px; font-weight: 700; }
+.riso .sh .meta { font-family: "DM Mono", monospace; font-size: 11px; color: var(--ink);
+  margin-left: auto; align-self: center; }
+
+.riso .chartcard { border: 2px solid var(--ink); padding: 14px 14px 6px; }
+.riso svg { display: block; width: 100%; height: auto; }
+
+/* ---------- data table ---------- */
+.riso .tablecard { border: 2px solid var(--ink); overflow-x: auto; }
+.riso table { border-collapse: collapse; width: 100%; min-width: 520px; font-size: 14px; }
+.riso caption { text-align: left; font-family: "DM Mono", monospace; font-size: 11px;
+  letter-spacing: 0.08em; text-transform: uppercase; padding: 11px 14px; border-bottom: 2px solid var(--ink); }
+.riso th, .riso td { text-align: left; padding: 11px 14px; border-bottom: 1px solid var(--hair); }
+.riso thead th { background: var(--p1); color: #fff; font-family: "DM Mono", monospace;
+  font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase; font-weight: 500; }
+.riso td.num { text-align: right; font-variant-numeric: tabular-nums; }
+.riso tbody tr:hover { background: var(--paper-2); }
+
+.riso .pill { font-family: "DM Mono", monospace; font-size: 11px; border: 2px solid var(--ink);
+  padding: 2px 8px; display: inline-block; letter-spacing: 0.04em; }
+.riso .role-maal { background: var(--p1); color: #fff; }
+.riso .role-dimension { background: var(--hi); color: var(--ink); }
+.riso .role-tid { background: var(--p2); color: #fff; }
+
+/* ---------- states ---------- */
+.riso .tool-error { background: #fbe3e3; border: 2px solid var(--ano-deep); color: var(--ano-deep);
+  padding: 10px 14px; font-size: 13.5px; margin-top: 18px; }
+.riso .tool-loading { font-family: "DM Mono", monospace; color: var(--p2); font-size: 13px; margin-top: 18px; }
+
+.riso footer { padding: 26px 0 60px; display: flex; justify-content: space-between;
+  flex-wrap: wrap; gap: 10px; border-top: 2px solid var(--ink); margin-top: 30px; }
+
+.riso .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+  overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
+
+@media (max-width: 880px) {
+  .riso .kpis { grid-template-columns: repeat(2, 1fr); }
+  .riso .menu a { padding: 7px 10px; }
 }
-
-/* the six series cycle these three (+ dash); orange never appears as a series */
-.riso .s1 { color: var(--olive); }
-.riso .s2 { color: var(--tan); }
-.riso .s3 { color: var(--gold); }
-
-/* signal-type stamp colours — orange ONLY for anomaly */
-.riso .stamp-anomali { background: var(--ano); color: #fff; }
-.riso .stamp-trend { background: var(--olive); color: #fff; }
-.riso .stamp-korrelation { background: var(--tan); color: #fff; }
-.riso .stamp-segment { background: var(--gold); color: var(--ink); }
-.riso .stamp-koncentration { background: var(--ink); color: var(--paper); }
-
-/* ---- tool layout ---- */
-.tool-wrap { min-height: 100vh; max-width: 980px; margin: 0 auto; padding: 32px 22px 64px; }
-.tool-head { border-bottom: 2px solid var(--ink); padding-bottom: 14px; margin-bottom: 18px; }
-.tool-head .eyebrow { font-size: 11px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--tan); margin: 0 0 6px; }
-.tool-head h1 { font-size: 30px; font-weight: 700; line-height: 1.08; margin: 0; }
-
-.tool-controls { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 14px; }
-.tool-controls select, .tool-controls input, .tool-controls button {
-  font-size: 13px; padding: 8px 11px; border: 2px solid var(--ink);
-  background: var(--paper2); color: var(--ink); border-radius: 8px;
+@media (max-width: 560px) {
+  .riso .nav .row { flex-wrap: wrap; gap: 12px; }
+  .riso .nav .spacer { flex-basis: 100%; height: 0; }
+  .riso .hero h1 { font-size: 46px; }
 }
-.tool-controls input { flex: 1; min-width: 180px; }
-.tool-controls button { background: var(--olive); color: #fff; cursor: pointer; font-weight: 500; }
-.tool-controls button:hover { background: var(--ink); }
-
-.ds-list { list-style: none; margin: 0 0 18px; padding: 0; display: grid; gap: 6px; }
-.ds-item { width: 100%; text-align: left; display: flex; gap: 10px; align-items: baseline;
-  background: var(--paper2); border: 1px solid var(--hair); border-radius: 8px;
-  padding: 8px 12px; cursor: pointer; color: var(--ink); }
-.ds-item:hover { border-color: var(--ink); background: var(--paper); }
-.ds-id { font-size: 11px; color: var(--tan); min-width: 84px; }
-.ds-title { font-size: 13.5px; }
-
-.tool-error { background: #fbe3e3; border: 2px solid var(--ano-deep); color: var(--ano-deep);
-  border-radius: 8px; padding: 10px 14px; font-size: 13.5px; }
-.tool-loading { color: var(--tan); font-size: 13px; }
-
-.profile-panel { border: 2px solid var(--ink); border-radius: 12px; padding: 18px 20px; background: var(--paper); }
-.profile-panel h2 { font-size: 20px; font-weight: 700; margin: 0 0 2px; }
-.profile-id { font-size: 11px; color: var(--tan); margin: 0 0 12px; }
-
-.strip { display: flex; gap: 8px; flex-wrap: wrap; align-items: baseline;
-  font-size: 13px; color: var(--ink); padding: 9px 13px;
-  background: var(--paper2); border-radius: 8px; margin-bottom: 16px; }
-.strip-stat b { font-size: 15px; }
-.strip-sep { color: var(--hair); }
-
-.col-table { width: 100%; border-collapse: collapse; font-size: 13px; }
-.col-table th { text-align: left; font-size: 10.5px; letter-spacing: 0.05em; text-transform: uppercase;
-  color: var(--tan); border-bottom: 2px solid var(--hair); padding: 6px 8px; }
-.col-table td { padding: 7px 8px; border-bottom: 1px solid var(--hair); }
-.col-table .col-type { color: var(--tan); font-size: 11.5px; }
-
-.role { font-size: 11px; font-weight: 600; border-radius: 999px; padding: 2px 9px; }
-.role-maal { background: var(--olive); color: #fff; }
-.role-dimension { background: var(--gold); color: var(--ink); }
-.role-tid { background: var(--tan); color: #fff; }
+@media (prefers-reduced-motion: reduce) {
+  .riso * { animation: none !important; transition: none !important; }
+}

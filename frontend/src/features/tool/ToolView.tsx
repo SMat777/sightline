@@ -32,7 +32,7 @@ export default function ToolView() {
     try {
       setResults(await fetchDatasets(source, query));
     } catch {
-      /* leave previous results */
+      /* keep previous results */
     }
   }
 
@@ -53,80 +53,136 @@ export default function ToolView() {
     }
   }
 
+  const sourceName = sources.find((s) => s.id === source)?.name ?? source;
+
   return (
-    <div className="riso tool-wrap">
-      <header className="tool-head">
-        <p className="eyebrow mono">Sightline · konfigurerbart data-viz-værktøj</p>
-        <h1>Hvad er det mest interessante i dine data?</h1>
-      </header>
+    <div className="riso">
+      <nav className="nav" aria-label="Primær">
+        <div className="row">
+          <a className="mark" href="#top" aria-label="Sightline, til toppen">
+            <svg className="glyph" viewBox="0 0 26 26" aria-hidden="true">
+              <circle className="a" cx="10" cy="13" r="9" />
+              <circle className="b" cx="16" cy="13" r="9" />
+            </svg>
+            Sightline <small>RISO·03</small>
+          </a>
+          <div className="menu">
+            <a href="#top" aria-current="page">Dashboard</a>
+            <a href="#top">Workflow</a>
+            <a href="#top">Reports</a>
+          </div>
+          <span className="spacer" />
+          <button className="btn" type="button">
+            Ny analyse
+            <svg className="ar" viewBox="0 0 16 16" aria-hidden="true">
+              <path d="M3 8h10M9 4l4 4-4 4" />
+            </svg>
+          </button>
+        </div>
+      </nav>
 
-      <div className="tool-controls">
-        <select
-          className="mono"
-          value={source}
-          onChange={(e) => setSource(e.target.value)}
-          aria-label="Datakilde"
-        >
-          {sources.map((s) => (
-            <option key={s.id} value={s.id}>{s.name}</option>
-          ))}
-        </select>
-        <input
-          className="mono"
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-          onKeyDown={(e) => e.key === "Enter" && runSearch()}
-          placeholder="Søg datasæt…"
-          aria-label="Søg datasæt"
-        />
-        <button className="mono" onClick={runSearch}>Søg</button>
+      <div className="wrap" id="top">
+        <div className="hero">
+          <h1>FIND&nbsp;SIGNALET.</h1>
+          <div className="sub">
+            <p>
+              Forbind en dansk datakilde — Sightline profilerer den automatisk og
+              finder selv det mest interessante. Print-håndværk møder
+              beslutningsstøtte, skarpt og roligt.
+            </p>
+            <span className="live" aria-label={`Datakilde: ${sourceName}`}>
+              <span className="dot" aria-hidden="true" /> {sourceName} · live
+            </span>
+          </div>
+        </div>
+
+        <div className="controls" role="group" aria-label="Vælg datakilde og datasæt">
+          <span className="tag lab">Kilde</span>
+          <select
+            className="mono"
+            value={source}
+            onChange={(e) => setSource(e.target.value)}
+            aria-label="Datakilde"
+          >
+            {sources.map((s) => (
+              <option key={s.id} value={s.id}>{s.name}</option>
+            ))}
+          </select>
+          <input
+            className="mono"
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            onKeyDown={(e) => e.key === "Enter" && runSearch()}
+            placeholder="Søg datasæt…"
+            aria-label="Søg datasæt"
+          />
+          <button className="go" type="button" onClick={runSearch}>Søg</button>
+        </div>
+
+        {results.length > 0 && (
+          <ul className="ds-list">
+            {results.map((r) => (
+              <li key={r.id}>
+                <button className="ds-item" onClick={() => loadProfile(source, r.id)}>
+                  <span className="ds-id">{r.id}</span>
+                  <span className="ds-title">{r.title}</span>
+                </button>
+              </li>
+            ))}
+          </ul>
+        )}
+
+        {error && (
+          <p className="tool-error" role="alert">
+            Kunne ikke hente datasæt: {error}. Er API'et startet?
+          </p>
+        )}
+
+        {loading && <p className="tool-loading">Henter &amp; profilerer…</p>}
+
+        {profile && !loading && (
+          <section aria-live="polite">
+            <div className="sh">
+              <span className="no">01</span>
+              <h2>{profile.title}</h2>
+              <span className="meta">{profile.id}</span>
+            </div>
+
+            <DataProfileStrip profile={profile} />
+
+            <div className="tablecard" style={{ marginTop: 18 }}>
+              <table>
+                <caption>Kolonner og deres udledte roller</caption>
+                <thead>
+                  <tr>
+                    <th scope="col">Kolonne</th>
+                    <th scope="col">Rolle</th>
+                    <th scope="col">Type</th>
+                    <th scope="col">Distinkte</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {profile.columns.map((c) => (
+                    <tr key={c.name}>
+                      <td className="mono">{c.name}</td>
+                      <td><span className={`pill role-${c.role.toLowerCase()}`}>{roleLabel[c.role]}</span></td>
+                      <td className="mono">{c.type}</td>
+                      <td className="num tnum">{c.cardinality}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </section>
+        )}
+
+        <footer>
+          <span className="tag">
+            Begrænset jordnær palette + reserveret orange = afvigelsen springer frem.
+          </span>
+          <span className="tag">Sightline · DNA № 03 · konfigurerbart værktøj</span>
+        </footer>
       </div>
-
-      {results.length > 0 && (
-        <ul className="ds-list">
-          {results.map((r) => (
-            <li key={r.id}>
-              <button className="ds-item" onClick={() => loadProfile(source, r.id)}>
-                <span className="mono ds-id">{r.id}</span>
-                <span className="ds-title">{r.title}</span>
-              </button>
-            </li>
-          ))}
-        </ul>
-      )}
-
-      {error && (
-        <p className="tool-error" role="alert">
-          Kunne ikke hente datasæt: {error}. Er API'et startet?
-        </p>
-      )}
-
-      {loading && <p className="mono tool-loading">Henter &amp; profilerer…</p>}
-
-      {profile && !loading && (
-        <section className="profile-panel" aria-live="polite">
-          <h2>{profile.title}</h2>
-          <p className="mono profile-id">{profile.id}</p>
-          <DataProfileStrip profile={profile} />
-
-          <table className="col-table">
-            <caption className="sr-only">Kolonner og deres udledte roller</caption>
-            <thead>
-              <tr><th>Kolonne</th><th>Rolle</th><th>Type</th><th>Distinkte</th></tr>
-            </thead>
-            <tbody>
-              {profile.columns.map((c) => (
-                <tr key={c.name}>
-                  <td className="mono">{c.name}</td>
-                  <td><span className={`role role-${c.role.toLowerCase()}`}>{roleLabel[c.role]}</span></td>
-                  <td className="mono col-type">{c.type}</td>
-                  <td className="mono">{c.cardinality}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </section>
-      )}
     </div>
   );
 }
