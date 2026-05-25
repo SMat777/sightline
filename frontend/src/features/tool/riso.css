@@ -35,3 +35,51 @@
 .riso .stamp-korrelation { background: var(--tan); color: #fff; }
 .riso .stamp-segment { background: var(--gold); color: var(--ink); }
 .riso .stamp-koncentration { background: var(--ink); color: var(--paper); }
+
+/* ---- tool layout ---- */
+.tool-wrap { min-height: 100vh; max-width: 980px; margin: 0 auto; padding: 32px 22px 64px; }
+.tool-head { border-bottom: 2px solid var(--ink); padding-bottom: 14px; margin-bottom: 18px; }
+.tool-head .eyebrow { font-size: 11px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--tan); margin: 0 0 6px; }
+.tool-head h1 { font-size: 30px; font-weight: 700; line-height: 1.08; margin: 0; }
+
+.tool-controls { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 14px; }
+.tool-controls select, .tool-controls input, .tool-controls button {
+  font-size: 13px; padding: 8px 11px; border: 2px solid var(--ink);
+  background: var(--paper2); color: var(--ink); border-radius: 8px;
+}
+.tool-controls input { flex: 1; min-width: 180px; }
+.tool-controls button { background: var(--olive); color: #fff; cursor: pointer; font-weight: 500; }
+.tool-controls button:hover { background: var(--ink); }
+
+.ds-list { list-style: none; margin: 0 0 18px; padding: 0; display: grid; gap: 6px; }
+.ds-item { width: 100%; text-align: left; display: flex; gap: 10px; align-items: baseline;
+  background: var(--paper2); border: 1px solid var(--hair); border-radius: 8px;
+  padding: 8px 12px; cursor: pointer; color: var(--ink); }
+.ds-item:hover { border-color: var(--ink); background: var(--paper); }
+.ds-id { font-size: 11px; color: var(--tan); min-width: 84px; }
+.ds-title { font-size: 13.5px; }
+
+.tool-error { background: #fbe3e3; border: 2px solid var(--ano-deep); color: var(--ano-deep);
+  border-radius: 8px; padding: 10px 14px; font-size: 13.5px; }
+.tool-loading { color: var(--tan); font-size: 13px; }
+
+.profile-panel { border: 2px solid var(--ink); border-radius: 12px; padding: 18px 20px; background: var(--paper); }
+.profile-panel h2 { font-size: 20px; font-weight: 700; margin: 0 0 2px; }
+.profile-id { font-size: 11px; color: var(--tan); margin: 0 0 12px; }
+
+.strip { display: flex; gap: 8px; flex-wrap: wrap; align-items: baseline;
+  font-size: 13px; color: var(--ink); padding: 9px 13px;
+  background: var(--paper2); border-radius: 8px; margin-bottom: 16px; }
+.strip-stat b { font-size: 15px; }
+.strip-sep { color: var(--hair); }
+
+.col-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+.col-table th { text-align: left; font-size: 10.5px; letter-spacing: 0.05em; text-transform: uppercase;
+  color: var(--tan); border-bottom: 2px solid var(--hair); padding: 6px 8px; }
+.col-table td { padding: 7px 8px; border-bottom: 1px solid var(--hair); }
+.col-table .col-type { color: var(--tan); font-size: 11.5px; }
+
+.role { font-size: 11px; font-weight: 600; border-radius: 999px; padding: 2px 9px; }
+.role-maal { background: var(--olive); color: #fff; }
+.role-dimension { background: var(--gold); color: var(--ink); }
+.role-tid { background: var(--tan); color: #fff; }
