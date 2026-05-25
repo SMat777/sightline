@@ -17,6 +17,9 @@ builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("Default")));
 
+// Connectors call public APIs (DST, Open Data DK) over a pooled HttpClient.
+builder.Services.AddHttpClient();
+
 builder.Services.AddScoped<IEnergyRepository, EnergyRepository>();
 builder.Services.AddScoped<IScoreService, ScoreService>();
 builder.Services.AddScoped<IAnomalyService, AnomalyService>();
