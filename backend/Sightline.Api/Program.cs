@@ -1,6 +1,7 @@
 using Sightline.Api.Data;
 using Sightline.Api.Infrastructure;
 using Sightline.Api.Services;
+using Sightline.Api.Services.Sources;
 using Microsoft.EntityFrameworkCore;
 using Scalar.AspNetCore;
 
@@ -19,6 +20,7 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 
 // Connectors call public APIs (DST, Open Data DK) over a pooled HttpClient.
 builder.Services.AddHttpClient();
+builder.Services.AddScoped<IDataSource, DstConnector>();
 
 builder.Services.AddScoped<IEnergyRepository, EnergyRepository>();
 builder.Services.AddScoped<IScoreService, ScoreService>();
