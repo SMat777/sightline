@@ -39,6 +39,24 @@ export default function ToolView() {
     }
   }
 
+  // Switching source clears the old view and loads the new source's first dataset,
+  // so the same dashboard immediately renders on a very different data shape.
+  async function switchSource(newSource: string) {
+    const q = newSource === "open-data-dk" ? "trafik" : "befolkning";
+    setSource(newSource);
+    setQuery(q);
+    setProfile(null);
+    setResults([]);
+    setError(null);
+    try {
+      const refs = await fetchDatasets(newSource, q);
+      setResults(refs);
+      if (refs[0]) loadProfile(newSource, refs[0].id);
+    } catch {
+      /* surfaced on next profile attempt */
+    }
+  }
+
   async function loadProfile(src: string, id: string) {
     load.current?.abort();
     const ctrl = new AbortController();
@@ -113,7 +131,7 @@ export default function ToolView() {
           <select
             className="mono"
             value={source}
-            onChange={(e) => setSource(e.target.value)}
+            onChange={(e) => switchSource(e.target.value)}
             aria-label="Datakilde"
           >
             {sources.map((s) => (
