@@ -117,6 +117,31 @@ body { background: #f3eddc; }
 .riso .shape-tid { background: var(--p2); }
 .riso .shape-val { text-align: right; font-size: 12px; }
 
+/* ---- signal-kort feed ---- */
+.riso .feed { display: grid; gap: 14px; }
+.riso .feed-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; }
+.riso .scard { border: 2px solid var(--ink); padding: 14px 16px; background: transparent;
+  display: flex; flex-direction: column; gap: 10px; }
+.riso .scard-hero { border-width: 3px; }
+.riso .scard-top { display: flex; align-items: center; gap: 10px; }
+.riso .stamp { font-family: "DM Mono", monospace; font-size: 10px; letter-spacing: 0.06em;
+  text-transform: uppercase; padding: 3px 9px; border: 2px solid var(--ink); }
+.riso .scard-rank { margin-left: auto; font-size: 12px; color: var(--p2); }
+.riso .scard-head { font-size: 17px; font-weight: 700; line-height: 1.15; }
+.riso .scard-hero .scard-head { font-size: clamp(20px, 2.6vw, 28px); }
+.riso .miniviz { border: 2px solid var(--ink); background: var(--paper-2); }
+.riso .scard-foot { display: flex; align-items: center; gap: 12px; }
+.riso .strength { flex: 1; height: 10px; background: var(--paper-2); border: 2px solid var(--ink); }
+.riso .strength-fill { display: block; height: 100%; background: var(--olive); }
+.riso .conf { font-size: 13px; color: var(--p1); letter-spacing: 2px; }
+.riso .scard-why summary { font-family: "DM Mono", monospace; font-size: 10.5px; color: var(--p2);
+  cursor: pointer; text-transform: uppercase; letter-spacing: 0.06em; min-height: 30px;
+  display: inline-flex; align-items: center; }
+.riso .why-list { list-style: none; margin: 6px 0 0; padding: 0; display: grid; gap: 4px; }
+.riso .why-list li { display: flex; justify-content: space-between; font-size: 12px; }
+.riso .why-list b { color: var(--p1); }
+@media (max-width: 720px) { .riso .feed-grid { grid-template-columns: 1fr; } }
+
 /* entrance (reduced-motion aware below) */
 .riso .rise { opacity: 0; transform: translateY(10px); animation: riso-rise 0.5s ease forwards; }
 @keyframes riso-rise { to { opacity: 1; transform: none; } }

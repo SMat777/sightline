@@ -1,8 +1,9 @@
 import { useEffect, useRef, useState } from "react";
-import { fetchSources, fetchDatasets, fetchProfile } from "../../tool-api";
-import type { Source, DatasetRef, DatasetProfile } from "../../tool-types";
+import { fetchSources, fetchDatasets, fetchProfile, fetchFindings } from "../../tool-api";
+import type { Source, DatasetRef, DatasetProfile, Finding } from "../../tool-types";
 import DataProfileStrip from "./DataProfileStrip";
 import DataShape from "./DataShape";
+import SignalCard from "./SignalCard";
 import "./riso.css";
 
 const roleLabel: Record<string, string> = {
@@ -17,6 +18,7 @@ export default function ToolView() {
   const [query, setQuery] = useState("befolkning");
   const [results, setResults] = useState<DatasetRef[]>([]);
   const [profile, setProfile] = useState<DatasetProfile | null>(null);
+  const [findings, setFindings] = useState<Finding[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const load = useRef<AbortController | null>(null);
@@ -63,9 +65,16 @@ export default function ToolView() {
     load.current = ctrl;
     setLoading(true);
     setError(null);
+    setFindings([]);
     try {
-      const p = await fetchProfile(src, id, ctrl.signal);
-      if (!ctrl.signal.aborted) setProfile(p);
+      const [p, f] = await Promise.all([
+        fetchProfile(src, id, ctrl.signal),
+        fetchFindings(src, id, ctrl.signal),
+      ]);
+      if (!ctrl.signal.aborted) {
+        setProfile(p);
+        setFindings(f);
+      }
     } catch (e) {
       if (ctrl.signal.aborted) return;
       setError(e instanceof Error ? e.message : "Ukendt fejl");
@@ -98,6 +107,7 @@ export default function ToolView() {
           </a>
           <div className="menu">
             <a href="#top" aria-current="page">Dashboard</a>
+            <a href="#fund">Fund</a>
             <a href="#profil">Profil</a>
             <a href="#kolonner">Kolonner</a>
           </div>
@@ -181,11 +191,31 @@ export default function ToolView() {
 
         {loading && <p className="tool-loading">Henter &amp; profilerer…</p>}
 
+        {findings.length > 0 && !loading && (
+          <section id="fund" className="rise">
+            <div className="sh">
+              <span className="no">01</span>
+              <h2>Mest interessante fund</h2>
+              <span className="meta">{findings.length} signaler · rangeret</span>
+            </div>
+            <div className="feed">
+              <SignalCard finding={findings[0]} rank={1} hero />
+              {findings.length > 1 && (
+                <div className="feed-grid">
+                  {findings.slice(1).map((f, idx) => (
+                    <SignalCard key={`${f.type}-${idx}`} finding={f} rank={idx + 2} />
+                  ))}
+                </div>
+              )}
+            </div>
+          </section>
+        )}
+
         {profile && !loading && (
           <>
             <section id="profil" className="rise" aria-live="polite">
               <div className="sh">
-                <span className="no">01</span>
+                <span className="no">02</span>
                 <h2>{profile.title}</h2>
                 <span className="meta">{profile.id}</span>
               </div>
@@ -198,7 +228,7 @@ export default function ToolView() {
 
             <section id="kolonner" className="rise">
               <div className="sh">
-                <span className="no">02</span>
+                <span className="no">03</span>
                 <h2>Kolonner &amp; roller</h2>
                 <span className="meta">udledt ved profilering</span>
               </div>
