@@ -22,6 +22,30 @@ import folk1aProfile from "./dst/FOLK1A-profile.json";
 import folk1aFindings from "./dst/FOLK1A-findings.json";
 import folk1aStats from "./dst/FOLK1A-stats.json";
 
+import aku110kProfile from "./dst/AKU110K-profile.json";
+import aku110kFindings from "./dst/AKU110K-findings.json";
+import aku110kStats from "./dst/AKU110K-stats.json";
+
+import nan1Profile from "./dst/NAN1-profile.json";
+import nan1Findings from "./dst/NAN1-findings.json";
+import nan1Stats from "./dst/NAN1-stats.json";
+
+import auk01Profile from "./dst/AUK01-profile.json";
+import auk01Findings from "./dst/AUK01-findings.json";
+import auk01Stats from "./dst/AUK01-stats.json";
+
+import hfudd11Profile from "./dst/HFUDD11-profile.json";
+import hfudd11Findings from "./dst/HFUDD11-findings.json";
+import hfudd11Stats from "./dst/HFUDD11-stats.json";
+
+import gf11Profile from "./dst/GF11-profile.json";
+import gf11Findings from "./dst/GF11-findings.json";
+import gf11Stats from "./dst/GF11-stats.json";
+
+import mus1Profile from "./dst/MUS1-profile.json";
+import mus1Findings from "./dst/MUS1-findings.json";
+import mus1Stats from "./dst/MUS1-stats.json";
+
 import trafiktalProfile from "./odk/trafiktal-profile.json";
 import trafiktalFindings from "./odk/trafiktal-findings.json";
 import trafiktalStats from "./odk/trafiktal-stats.json";
@@ -45,12 +69,54 @@ const entries: Record<string, FixtureEntry> = {
     findings: folk1aFindings as Finding[],
     stats: folk1aStats as StatPack,
   },
+  "danmarks-statistik:AKU110K": {
+    ref: { id: "AKU110K", title: "Arbejdsmarkedstilknytning", org: null, period: "2008K1–2025K4", variables: 4 },
+    subjectId: "2",
+    profile: aku110kProfile as DatasetProfile,
+    findings: aku110kFindings as Finding[],
+    stats: aku110kStats as StatPack,
+  },
+  "danmarks-statistik:NAN1": {
+    ref: { id: "NAN1", title: "Forsyningsbalance, bruttonationalprodukt (BNP), økonomisk vækst, beskæftigelse mv.", org: null, period: "1966–2025", variables: 3 },
+    subjectId: "3",
+    profile: nan1Profile as DatasetProfile,
+    findings: nan1Findings as Finding[],
+    stats: nan1Stats as StatPack,
+  },
+  "danmarks-statistik:AUK01": {
+    ref: { id: "AUK01", title: "Offentligt forsørgede (fuldtidsmodtagere)", org: null, period: "2007K1–2025K4", variables: 5 },
+    subjectId: "4",
+    profile: auk01Profile as DatasetProfile,
+    findings: auk01Findings as Finding[],
+    stats: auk01Stats as StatPack,
+  },
+  "danmarks-statistik:HFUDD11": {
+    ref: { id: "HFUDD11", title: "Befolkningens højest fuldførte uddannelse (15-69 år)", org: null, period: "2008–2025", variables: 6 },
+    subjectId: "5",
+    profile: hfudd11Profile as DatasetProfile,
+    findings: hfudd11Findings as Finding[],
+    stats: hfudd11Stats as StatPack,
+  },
+  "danmarks-statistik:GF11": {
+    ref: { id: "GF11", title: "Generel firmastatistik", org: null, period: "2019–2023", variables: 3 },
+    subjectId: "6",
+    profile: gf11Profile as DatasetProfile,
+    findings: gf11Findings as Finding[],
+    stats: gf11Stats as StatPack,
+  },
   "danmarks-statistik:BIL55": {
     ref: { id: "BIL55", title: "Nyregistrerede personbiler", org: null, period: "2007M01–2026M04", variables: 2 },
     subjectId: "7",
     profile: bil55Profile as DatasetProfile,
     findings: bil55Findings as Finding[],
     stats: bil55Stats as StatPack,
+  },
+  "danmarks-statistik:MUS1": {
+    ref: { id: "MUS1", title: "Aktivitet på danske museer", org: null, period: "2009–2024", variables: 4 },
+    subjectId: "8",
+    profile: mus1Profile as DatasetProfile,
+    findings: mus1Findings as Finding[],
+    stats: mus1Stats as StatPack,
   },
   "danmarks-statistik:ENEBR": {
     ref: { id: "ENEBR", title: "Industriens energiforbrug", org: null, period: "2012–2024", variables: 3 },
