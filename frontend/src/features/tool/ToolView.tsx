@@ -12,6 +12,7 @@ import Histogram from "./Histogram";
 import { AreaDeck, Waffle, BulletChart } from "./SegmentViews";
 import LensSelector, { type Bias } from "./LensSelector";
 import { daNum, pct } from "../../lib/format";
+import { useFixtures } from "../../fixtures";
 import "./riso.css";
 
 const roleLabel: Record<string, string> = { Maal: "mål", Dimension: "dimension", Tid: "tid" };
@@ -192,8 +193,8 @@ export default function ToolView() {
             Sightline <small>RISO·03</small>
           </a>
           <span className="spacer" />
-          <span className="live" aria-label={`Datakilde: ${sourceName}`}>
-            <span className="dot" aria-hidden="true" /> {sourceName} · live
+          <span className="live" aria-label={`Datakilde: ${sourceName}${useFixtures ? " (demo-snapshot)" : " (live)"}`}>
+            <span className="dot" aria-hidden="true" /> {sourceName} · {useFixtures ? "snapshot" : "live"}
           </span>
           <button className="btn" type="button" onClick={newAnalysis}>
             Ny analyse
