@@ -29,14 +29,6 @@ Data exploration tool for Danish open data. 2 live sources · 9 subject trees ·
 
 ![BIL55 full view](frontend/public/screenshots/bil55-full.png)
 
-**Industriens energiforbrug (ENEBR).** Gini 0,67 means a few industries dominate. The concentration scanner surfaces it directly; the segment view and the histogram make it readable in seconds.
-
-![ENEBR full view](frontend/public/screenshots/enebr-full.png)
-
-**Trafiktal (Københavns Kommune, Open Data DK).** Different source, different shape — no time series, 710 unique streets. Same dashboard adapts: the trend section folds, the segment chart fills the canvas.
-
-![Trafiktal full view](frontend/public/screenshots/trafiktal-full.png)
-
 ---
 
 ## How it's built
