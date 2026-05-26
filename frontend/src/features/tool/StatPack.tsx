@@ -1,76 +1,43 @@
-import { useState } from "react";
 import type { StatPack as StatPackData, DatasetProfile } from "../../tool-types";
 import { daNum, compact, pct, signedPct } from "../../lib/format";
 
-// Detection chip — a role the profiler found (or didn't), never colour alone.
-function RoleChip({ on, glyph, label }: { on: boolean; glyph: string; label: string }) {
-  return (
-    <span className={`rp${on ? "" : " off"}`}>
-      <span aria-hidden="true">{on ? glyph : "—"}</span> {label}
-    </span>
-  );
-}
-
-// Inline trend sparkline — gives each stat-cell a "what's the shape" hint
-// without re-rendering the full trend chart. Skipped when there's < 2 points.
-function Sparkline({ points, height = 24 }: { points: number[]; height?: number }) {
-  if (points.length < 2) return null;
-  const min = Math.min(...points);
-  const max = Math.max(...points);
-  const range = max - min || 1;
-  const w = 100;
-  const step = w / (points.length - 1);
-  const d = points.map((v, i) => {
-    const x = i * step;
-    const y = height - ((v - min) / range) * height;
-    return `${i === 0 ? "M" : "L"}${x.toFixed(2)},${y.toFixed(2)}`;
-  }).join(" ");
-  const lastX = (points.length - 1) * step;
-  const lastY = height - ((points[points.length - 1] - min) / range) * height;
-  return (
-    <svg className="spark" viewBox={`0 0 ${w} ${height}`} preserveAspectRatio="none" aria-hidden="true">
-      <path d={d} fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinejoin="round" strokeLinecap="round" />
-      <circle cx={lastX} cy={lastY} r="2.2" fill="var(--p1)" />
-    </svg>
-  );
-}
-
 function StatCell({
-  glyph, lab, value, ctx, feat = false, warn = false, series,
-}: { glyph: string; lab: string; value: string; ctx?: string; feat?: boolean; warn?: boolean; series?: number[] }) {
+  glyph, lab, value, ctx, feat = false, warn = false, hint,
+}: { glyph?: string; lab: string; value: string; ctx?: string; feat?: boolean; warn?: boolean; hint?: string }) {
   return (
     <div className={`cell${feat ? " feat" : ""}${warn ? " warn" : ""}`}>
-      <span className="glyphbadge" aria-hidden="true">{glyph}</span>
-      <span className="cell-lab">{lab}</span>
+      {glyph && <span className="glyphbadge" aria-hidden="true">{glyph}</span>}
+      <span className="cell-lab">
+        {lab}
+        {hint && (
+          <span className="cell-info" tabIndex={0} role="button" aria-label={`Forklaring: ${lab}`}>
+            ?<span className="cell-tip" role="tooltip">{hint}</span>
+          </span>
+        )}
+      </span>
       <span className="cell-v tnum">{value}</span>
       {ctx && <span className="cell-ctx tnum">{ctx}</span>}
-      {series && <Sparkline points={series} height={feat ? 38 : 26} />}
     </div>
   );
 }
 
-// Role pill — colour-coded badge mapping backend role names to short Danish.
 function RoleBadge({ role }: { role: string }) {
   const map: Record<string, string> = { Maal: "Mål", Dimension: "Dim", Tid: "Tid" };
   const cls = role === "Maal" ? "rb-maal" : role === "Tid" ? "rb-tid" : "rb-dim";
   return <span className={`rb ${cls}`}>{map[role] ?? role}</span>;
 }
 
-// Struktur-view: per-column inventory with role badge, type, cardinality bar,
-// null-ratio bar and (numeric) min/max. The fallback when there's no measure
-// to aggregate AND the toggle-target when a user wants to inspect the schema.
-function StructView({ stats, profile }: { stats: StatPackData; profile: DatasetProfile }) {
+// Shown only when the profiler found no numeric measure to aggregate —
+// surfaces the dataset's structure as a fallback so the page isn't empty.
+function StructView({ profile }: { profile: DatasetProfile }) {
   const byRole = (r: string) => profile.columns.filter((c) => c.role === r).length;
   const maxCard = Math.max(...profile.columns.map((c) => c.cardinality), 1);
   const highNull = profile.columns.filter((c) => c.nullRatio > 0.5).length;
-  const reason = !stats.hasMeasure
-    ? "Intet numerisk mål at aggregere — udforsk strukturen herunder for at finde din vinkel."
-    : "Strukturen bag tallene — kolonner, roller, kvalitet.";
   return (
     <div className="struct">
       <div className="struct-head">
         <div className="struct-title"><span className="tg">STRUKTUR</span><strong>{profile.title}</strong></div>
-        <p className="struct-reason">{reason}</p>
+        <p className="struct-reason">Intet numerisk mål at aggregere — udforsk strukturen herunder for at finde din vinkel.</p>
       </div>
 
       <div className="struct-summary">
@@ -117,84 +84,75 @@ function StructView({ stats, profile }: { stats: StatPackData; profile: DatasetP
   );
 }
 
-// Quick data-quality chip — aggregates null-ratio + role coverage from the
-// profile into a single confidence-level line above the stat-pack.
-function QualityChip({ profile }: { profile: DatasetProfile }) {
-  const cols = profile.columns;
-  const nullsHigh = cols.filter((c) => c.nullRatio > 0.5).length;
-  const nullsAny = cols.filter((c) => c.nullRatio > 0).length;
-  const avgNull = cols.reduce((a, c) => a + c.nullRatio, 0) / Math.max(cols.length, 1);
-  const verdict = nullsHigh > 0 ? "blandet" : avgNull > 0.05 ? "ok" : "god";
-  const tone = nullsHigh > 0 ? "warn" : avgNull > 0.05 ? "mid" : "good";
-  return (
-    <div className={`qchip ${tone}`}>
-      <span className="qchip-lab">Datakvalitet:</span>
-      <strong>{verdict}</strong>
-      <span className="qchip-sep" aria-hidden="true">·</span>
-      <span>{pct(avgNull, 1)} nuller i snit</span>
-      <span className="qchip-sep" aria-hidden="true">·</span>
-      <span>{cols.length - nullsAny}/{cols.length} kolonner uden huller</span>
-    </div>
-  );
-}
-
 export default function StatPack({ stats, profile }: { stats: StatPackData; profile: DatasetProfile }) {
-  const [showForm, setShowForm] = useState(false);
   const m = stats.measure;
-  const canAuto = stats.hasMeasure && m !== null;
-  const auto = canAuto && !showForm;
+  if (!stats.hasMeasure || m === null) return <StructView profile={profile} />;
+
+  const sumCtx = `${daNum(m.count)} ${stats.hasDimension ? "segmenter" : "værdier"}`
+    + (stats.yoYPct !== null ? ` · ${signedPct(stats.yoYPct)} ${stats.yoYLabel}` : "");
+  const yoYGlyph = stats.yoYPct !== null ? (stats.yoYPct >= 0 ? "↑" : "↓") : undefined;
+
+  // Data-aware sentence builders. Bruger faktiske tal + dataset-kontekst,
+  // ikke generiske statistik-definitioner. Falder tilbage til neutral
+  // formulering hvis felter mangler.
+  const unit = profile.unit ?? "";
+  const unitLow = unit ? ` ${unit.toLowerCase()}` : "";
+  const segLabel = stats.hasDimension ? "segmenter" : "observationer";
+  const dataset = profile.title;
+  const top = stats.topSegments[0];
+  const bot = stats.topSegments[stats.topSegments.length - 1];
+  const meanMedianDiff = m.median !== 0 ? ((m.mean - m.median) / m.median) * 100 : 0;
+  const skewWord = Math.abs(meanMedianDiff) < 5
+    ? "tæt på medianen — fordelingen er forholdsvis symmetrisk"
+    : meanMedianDiff > 0
+      ? "højere end medianen — fordelingen er trukket op af store værdier"
+      : "lavere end medianen — fordelingen er trukket ned af små værdier";
+  const giniWord = stats.gini === null ? "" : stats.gini < 0.25
+    ? "en relativt jævn fordeling"
+    : stats.gini < 0.5
+      ? "en moderat skæv fordeling"
+      : "en stærkt skæv fordeling med få dominerende aktører";
 
   return (
-    <div>
-      <QualityChip profile={profile} />
-
-      <div className="detect-mini" role="status">
-        <span className="txt">
-          {canAuto
-            ? <>Stat-pack regnet for <b>{daNum(stats.segmentCount || stats.rowCount)}</b> {stats.hasDimension ? "segmenter" : "datapunkter"}</>
-            : <>Kun struktur fundet — ingen tal at aggregere</>}
-        </span>
-        <span className="roles">
-          <RoleChip on={stats.hasMeasure} glyph="↗" label="mål" />
-          <RoleChip on={stats.hasDimension} glyph="◆" label="dim" />
-          <RoleChip on={stats.hasTime} glyph="◷" label="tid" />
-        </span>
-      </div>
-
-      {canAuto && (
-        <div className="seg seg-sm" role="group" aria-label="Visning">
-          <button type="button" aria-pressed={auto} onClick={() => setShowForm(false)}>Auto stat-pack</button>
-          <button type="button" aria-pressed={!auto} onClick={() => setShowForm(true)}>Struktur</button>
-        </div>
-      )}
-
-      {auto && m ? (
-        <div className="pack">
-          {(() => {
-            // Sparkline only on the Σ feat cell — drawing the same shape under
-            // mean/max/min implied four different metrics share one curve.
-            const series = stats.hasTime && stats.series.length > 1 ? stats.series.map((p) => p.value) : undefined;
-            const sumCtx = `${daNum(m.count)} ${stats.hasDimension ? "segmenter" : "værdier"}`
-              + (stats.yoYPct !== null ? ` · ${signedPct(stats.yoYPct)} ${stats.yoYLabel}` : "")
-              + (stats.outlierCount > 0 ? ` · ⚠ ${stats.outlierCount} outliers` : "");
-            return <>
-              <StatCell feat glyph="Σ" lab={`${m.column} i alt`} value={compact(m.sum)}
-                ctx={sumCtx} series={series} warn={stats.outlierCount > 0} />
-              <StatCell glyph="⌀" lab="Gennemsnit" value={daNum(m.mean)} ctx={`median ${daNum(m.median)}`} />
-              <StatCell glyph="↑" lab="Højeste" value={daNum(m.max)} ctx={stats.topSegments[0]?.key} />
-              <StatCell glyph="↓" lab="Laveste" value={daNum(m.min)} />
-              {m.spanRatio !== null && <StatCell glyph="↔" lab="Spænd (top ÷ bund)" value={`×${daNum(m.spanRatio, 1)}`} />}
-              <StatCell glyph="σ" lab="Std.afvigelse" value={daNum(m.stdDev)} />
-              {stats.topShare !== null && <StatCell glyph="⊙" lab="Koncentration" value={pct(stats.topShare)}
-                ctx={stats.gini !== null ? `Gini ${daNum(stats.gini, 2)} · top 20%` : "top 20%"} />}
-              {stats.yoYPct !== null && <StatCell glyph="↗" lab="Ændring (år)" value={signedPct(stats.yoYPct)} ctx={stats.yoYLabel ?? undefined} />}
-              <StatCell glyph="!" lab="Outliers" value={daNum(stats.outlierCount)} ctx="> 3σ fra snit" warn={stats.outlierCount > 0} />
-            </>;
-          })()}
-        </div>
-      ) : (
-        <StructView stats={stats} profile={profile} />
-      )}
+    <div className="pack">
+      <StatCell feat lab={`${m.column} i alt`} value={compact(m.sum)}
+        ctx={sumCtx}
+        hint={`${compact(m.sum)}${unitLow} samlet på tværs af ${daNum(m.count)} ${segLabel} i perioden ${profile.period ?? "datasættet"}. Datasæt: ${dataset}.`} />
+      <StatCell lab="Gennemsnit" value={daNum(m.mean)}
+        ctx={`median ${daNum(m.median)}`}
+        hint={`${daNum(m.mean)}${unitLow} i snit per ${stats.hasDimension ? "segment" : "observation"}. Medianen (${daNum(m.median)}) ligger ${skewWord}.`} />
+      <StatCell glyph="↑" lab="Maksimum" value={daNum(m.max)}
+        ctx={top?.key}
+        hint={top?.key
+          ? `${daNum(m.max)}${unitLow} hos ${top.key} — den højeste observation i ${dataset}.`
+          : `${daNum(m.max)}${unitLow} — den højeste observation i ${dataset}.`} />
+      <StatCell glyph="↓" lab="Minimum" value={daNum(m.min)}
+        ctx={bot?.key && stats.topSegments.length > 1 ? bot.key : undefined}
+        hint={bot?.key && stats.topSegments.length > 1
+          ? `${daNum(m.min)}${unitLow} hos ${bot.key} — den laveste observation i ${dataset}.`
+          : `${daNum(m.min)}${unitLow} — den laveste observation i ${dataset}.`} />
+      {m.spanRatio !== null && <StatCell lab="Spændvidde" value={`×${daNum(m.spanRatio, 1)}`}
+        ctx="max ÷ min"
+        hint={top?.key && bot?.key && stats.topSegments.length > 1
+          ? `${top.key} har ×${daNum(m.spanRatio, 1)} så mange${unitLow} som ${bot.key}. Skala-forskellen mellem top og bund.`
+          : `Den højeste værdi er ×${daNum(m.spanRatio, 1)} så stor som den laveste. Skala-forskel mellem top og bund.`} />}
+      <StatCell lab="Spredning" value={daNum(m.stdDev)}
+        ctx="standardafvigelse"
+        hint={`Værdierne ligger typisk ±${daNum(m.stdDev)}${unitLow} fra gennemsnittet (${daNum(m.mean)}). ${m.stdDev / Math.max(m.mean, 1) < 0.3 ? "Datasættet er forholdsvis homogent." : "Stor variation mellem observationer."}`} />
+      {stats.topShare !== null && <StatCell lab="Koncentration" value={pct(stats.topShare)}
+        ctx={stats.gini !== null ? `Gini ${daNum(stats.gini, 2)} · top 20%` : "top 20%"}
+        hint={stats.gini !== null
+          ? `De største 20% af ${segLabel} står for ${pct(stats.topShare)} af totalen — Gini ${daNum(stats.gini, 2)} indikerer ${giniWord}.`
+          : `De største 20% af ${segLabel} står for ${pct(stats.topShare)} af totalen.`} />}
+      {stats.yoYPct !== null && <StatCell glyph={yoYGlyph} lab="Årlig ændring" value={signedPct(stats.yoYPct)}
+        ctx={stats.yoYLabel ?? undefined}
+        hint={`${m.column} ${stats.yoYPct >= 0 ? "voksede" : "faldt"} ${signedPct(stats.yoYPct)} ${stats.yoYLabel ?? "år for år"}. ${Math.abs(stats.yoYPct) < 2 ? "Stabilt niveau." : Math.abs(stats.yoYPct) < 10 ? "Mærkbar bevægelse." : "Markant ændring — værd at undersøge nærmere."}`} />}
+      <StatCell lab="Outliers" value={daNum(stats.outlierCount)}
+        ctx={stats.outlierCount > 0 ? "> 3σ fra snit" : "ingen over 3σ"}
+        warn={stats.outlierCount > 0}
+        hint={stats.outlierCount === 0
+          ? `Ingen observationer i ${dataset} er ekstreme (alle ligger inden for 3 standardafvigelser fra snittet) — datasættet er stabilt.`
+          : `${daNum(stats.outlierCount)} observation${stats.outlierCount === 1 ? "" : "er"} ligger mere end 3 standardafvigelser fra snittet — særtilfælde eller potentielle datafejl der bør undersøges.`} />
     </div>
   );
 }
