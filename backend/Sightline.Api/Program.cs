@@ -1,9 +1,7 @@
-using Sightline.Api.Data;
 using Sightline.Api.Infrastructure;
 using Sightline.Api.Services;
 using Sightline.Api.Services.Engine;
 using Sightline.Api.Services.Sources;
-using Microsoft.EntityFrameworkCore;
 using Scalar.AspNetCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -15,9 +13,6 @@ builder.Services.AddControllers();
 builder.Services.AddOpenApi();
 builder.Services.AddProblemDetails();
 builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
-
-builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseNpgsql(builder.Configuration.GetConnectionString("Default")));
 
 // Connectors call public APIs (DST, Open Data DK) over a pooled HttpClient.
 builder.Services.AddHttpClient();
@@ -34,11 +29,6 @@ builder.Services.AddScoped<ISignalScanner, ConcentrationScanner>();
 builder.Services.AddSingleton<Ranker>();
 builder.Services.AddScoped<ISignalEngine, SignalEngine>();
 builder.Services.AddScoped<IStatsService, StatsService>();
-
-builder.Services.AddScoped<IEnergyRepository, EnergyRepository>();
-builder.Services.AddScoped<IScoreService, ScoreService>();
-builder.Services.AddScoped<IAnomalyService, AnomalyService>();
-builder.Services.AddScoped<IRadarService, RadarService>();
 
 // Dev: Vite may land on any free local port, so trust loopback only.
 // Prod: lock to explicit origins from config (Cors:AllowedOrigins).
@@ -58,14 +48,6 @@ builder.Services.AddCors(options => options.AddPolicy(FrontendCorsPolicy, policy
 }));
 
 var app = builder.Build();
-
-// --- Database: migrate + seed on startup so the demo runs with one command ---
-using (var scope = app.Services.CreateScope())
-{
-    var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-    db.Database.Migrate();
-    SeedData.Apply(db);
-}
 
 // --- HTTP pipeline ---
 app.UseExceptionHandler();
