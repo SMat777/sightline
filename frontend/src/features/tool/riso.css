@@ -82,6 +82,8 @@ body { background: #f3eddc; }
 .riso .seg button:disabled { opacity: 0.4; cursor: not-allowed; }
 .riso .seg-sm { margin: 16px 0; }
 .riso .seg-sm button { padding: 7px 14px; min-height: 38px; font-size: 11px; }
+.riso .seg-inline { margin-left: auto; }
+.riso .seg-inline button { padding: 4px 10px; min-height: 26px; font-size: 10px; letter-spacing: 0.06em; }
 .riso .kilde { font-family: "DM Mono", monospace; font-size: 13px; padding: 8px 12px;
   border: 2px solid var(--ink); background: var(--paper-2); color: var(--ink); min-height: 42px; }
 .riso .searchbar { display: flex; gap: 8px; margin-top: 12px; }
@@ -151,45 +153,40 @@ body { background: #f3eddc; }
 .riso .panel-note { font-family: "DM Mono", monospace; font-size: 11.5px; color: var(--p2);
   margin-top: 14px; }
 
-/* ---------- detection banner (demoted: insight headline does the heavy lifting now) ---------- */
-.riso .detect-mini { display: flex; gap: 12px; align-items: center; flex-wrap: wrap;
-  font-family: "Space Grotesk", sans-serif; font-size: 13px; color: var(--p2);
-  padding: 8px 0 12px; border-bottom: 1px solid var(--hair); margin-bottom: 14px; }
-.riso .detect-mini .txt b { font-weight: 700; color: var(--ink); }
-.riso .detect-mini .roles { display: flex; gap: 6px; margin-left: auto; flex-wrap: wrap; }
-.riso .detect-mini .rp { font-family: "DM Mono", monospace; font-size: 11px; border: 2px solid var(--p2);
-  color: var(--p2); padding: 2px 8px; }
-.riso .detect-mini .rp.off { opacity: 0.45; border-style: dashed; }
-
-/* ---------- data-quality chip (one-line trust signal) ---------- */
-.riso .qchip { display: inline-flex; flex-wrap: wrap; align-items: center; gap: 8px;
-  font-family: "Space Grotesk", sans-serif; font-size: 13.5px; color: var(--ink);
-  border: 2px solid var(--ink); background: var(--paper-2); padding: 7px 14px; margin-bottom: 14px; }
-.riso .qchip-lab { color: var(--p2); }
-.riso .qchip strong { font-weight: 700; }
-.riso .qchip-sep { color: var(--hair); }
-.riso .qchip.good strong { color: var(--p1); }
-.riso .qchip.mid strong { color: var(--hi); }
-.riso .qchip.warn { border-color: var(--ano-deep); }
-.riso .qchip.warn strong { color: var(--ano-deep); }
-
 /* ---------- stat-pack cards ---------- */
 .riso .pack { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; }
 .riso .cell { border: 2px solid var(--ink); background: var(--paper-2); padding: 16px;
   display: flex; flex-direction: column; gap: 6px; position: relative; }
 .riso .cell.feat { grid-column: span 2; border-width: 3px; }
 .riso .cell.warn { border-color: var(--ano-deep); }
-.riso .cell.warn .cell-v { color: var(--ano-deep); }
 .riso .cell-lab { font-family: "DM Mono", monospace; font-size: 10px; letter-spacing: 0.09em;
-  text-transform: uppercase; color: var(--p2); }
-.riso .cell-v { font-size: clamp(24px, 3vw, 38px); font-weight: 700; color: var(--p1); line-height: 1; }
-.riso .cell.feat .cell-v { font-size: clamp(34px, 5vw, 56px); }
-.riso .cell-ctx { font-family: "DM Mono", monospace; font-size: 11px; color: var(--ink); }
+  text-transform: uppercase; color: var(--p2); display: inline-flex; align-items: center; gap: 7px; }
+.riso .cell-info { position: relative; display: inline-flex; align-items: center; justify-content: center;
+  width: 14px; height: 14px; border: 1.5px solid var(--ink); background: var(--paper);
+  font-family: "Space Grotesk", sans-serif; font-size: 10px; font-weight: 700;
+  text-transform: none; letter-spacing: 0; color: var(--ink); cursor: help; }
+.riso .cell-info:hover, .riso .cell-info:focus-visible { background: var(--hi); outline: none; }
+.riso .cell-tip { display: none; position: absolute; top: calc(100% + 8px); left: -8px;
+  z-index: 30; width: 260px; padding: 12px 14px;
+  background: var(--paper); border: 2px solid var(--ink); box-shadow: 4px 4px 0 var(--ink);
+  font-family: "Space Grotesk", sans-serif; font-size: 12.5px; font-weight: 400;
+  text-transform: none; letter-spacing: 0; color: var(--ink); line-height: 1.45;
+  text-align: left; white-space: normal; pointer-events: none; }
+.riso .cell-tip::before { content: ""; position: absolute; top: -9px; left: 8px;
+  width: 12px; height: 12px; background: var(--paper); border-left: 2px solid var(--ink);
+  border-top: 2px solid var(--ink); transform: rotate(45deg); }
+.riso .cell-info:hover .cell-tip, .riso .cell-info:focus-visible .cell-tip,
+.riso .cell-info:focus .cell-tip { display: block; }
+.riso .cell-v { font-size: clamp(24px, 3vw, 38px); font-weight: 700; color: var(--ink); line-height: 1; }
+.riso .cell.feat .cell-v { font-size: clamp(34px, 5vw, 56px); color: var(--p1); }
+.riso .cell.warn .cell-v { color: var(--ano-deep); }
+.riso .cell-ctx { font-family: "DM Mono", monospace; font-size: 11px; color: var(--p2); }
 .riso .glyphbadge { position: absolute; top: -12px; right: 12px; background: var(--hi);
-  border: 2px solid var(--ink); font-family: "DM Mono", monospace; font-size: 13px; padding: 1px 9px; }
-.riso .spark { display: block; width: 100%; margin-top: 8px; color: var(--p2); }
-.riso .cell.feat .spark { margin-top: 10px; }
-.riso .cell.warn .spark { color: var(--ano-deep); }
+  border: 2px solid var(--ink); box-shadow: 2px 2px 0 var(--ink);
+  font-family: "DM Mono", monospace; font-size: 13px; font-weight: 700;
+  padding: 1px 9px; color: var(--ink); }
+.riso .cell.feat .glyphbadge { font-size: 14px; padding: 2px 10px; }
+.riso .cell.warn .glyphbadge { background: var(--ano-deep); color: var(--paper); }
 
 /* ---------- insight headline (auto-prose above stat-pack) ---------- */
 .riso .insight { display: flex; gap: 14px; align-items: flex-start; border-left: 4px solid var(--p1);
@@ -277,12 +274,61 @@ body { background: #f3eddc; }
 .riso .why-scores dd { margin: 0; display: flex; align-items: center; gap: 6px; color: var(--ink); position: relative; }
 .riso .why-bar { display: inline-block; height: 6px; background: var(--p1); border: 1px solid var(--ink); flex: none; }
 
-/* columns-section expand toggle */
-.riso .cols-toggle { display: inline-block; margin-top: 12px; padding: 9px 18px;
-  border: 2px solid var(--ink); background: transparent; cursor: pointer;
-  font-family: "Space Grotesk", sans-serif; font-size: 14px; font-weight: 500; color: var(--ink);
-  transition: transform 0.15s ease, box-shadow 0.15s ease; }
-.riso .cols-toggle:hover { transform: translate(-2px, -2px); box-shadow: 4px 4px 0 var(--ink); }
+/* ---------- columns section: schema-strip (KPI band) + role-cards ---------- */
+.riso .schema-strip { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px;
+  margin-bottom: 18px; }
+.riso .ss-kpi { border: 2px solid var(--ink); background: var(--paper-2);
+  padding: 14px 16px; display: flex; flex-direction: column; gap: 4px; }
+.riso .ss-kpi .ss-lab { font-family: "DM Mono", monospace; font-size: 10px;
+  letter-spacing: 0.09em; text-transform: uppercase; color: var(--p2); }
+.riso .ss-kpi .ss-v { font-family: "Space Grotesk", sans-serif; font-size: 22px;
+  font-weight: 700; color: var(--ink); line-height: 1.1; }
+.riso .ss-kpi .ss-sub { font-family: "DM Mono", monospace; font-size: 11px; color: var(--p2); }
+.riso .ss-kpi.q-good .ss-v { color: var(--p1); }
+.riso .ss-kpi.q-mid .ss-v { color: var(--hi); }
+.riso .ss-kpi.q-warn { border-color: var(--ano-deep); }
+.riso .ss-kpi.q-warn .ss-v { color: var(--ano-deep); }
+
+/* equal-width role cards (1:1:1) — symmetric and visually anchored by role colour */
+.riso .role-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px;
+  align-items: stretch; }
+.riso .role-card { border: 2px solid var(--ink); background: var(--paper-2);
+  display: flex; flex-direction: column; min-height: 280px; }
+.riso .role-head { padding: 12px 16px; border-bottom: 2px solid var(--ink);
+  display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.riso .role-head .role-lab { font-family: "DM Mono", monospace; font-size: 13px;
+  letter-spacing: 0.09em; text-transform: uppercase; font-weight: 700; }
+.riso .role-head .role-count { font-family: "Space Grotesk", sans-serif; font-size: 22px;
+  font-weight: 700; line-height: 1; color: var(--p1); }
+.riso .role-head.r-maal { background: var(--p1); color: #fff; }
+.riso .role-head.r-maal .role-count { color: #fff; }
+.riso .role-head.r-dim { background: var(--paper); color: var(--ink); }
+.riso .role-head.r-tid { background: var(--hi); color: var(--ink); }
+.riso .role-head.r-tid .role-count { color: var(--ink); }
+.riso .role-list { display: flex; flex-direction: column; flex: 1; }
+.riso .role-item { padding: 12px 16px; border-bottom: 1px solid var(--hair);
+  display: flex; flex-direction: column; gap: 4px; }
+.riso .role-item:last-child { border-bottom: none; }
+.riso .role-item-top { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; }
+.riso .role-nm { font-size: 14px; font-weight: 500; color: var(--ink); letter-spacing: 0.02em; }
+.riso .role-ty { font-size: 10px; color: var(--p2); text-transform: uppercase;
+  letter-spacing: 0.08em; white-space: nowrap; }
+.riso .role-sub { font-family: "Space Grotesk", sans-serif; font-size: 12.5px; color: var(--p2); line-height: 1.4; }
+.riso .role-bar { height: 4px; background: var(--paper); border: 1px solid var(--ink); margin-top: 6px; }
+.riso .role-bar-fill { display: block; height: 100%; background: var(--p1); }
+.riso .role-empty { padding: 16px; font-size: 12.5px; color: var(--p2); font-style: normal;
+  text-align: center; flex: 1; display: flex; align-items: center; justify-content: center; }
+.riso .role-more { padding: 10px 16px; border: none; border-top: 2px solid var(--ink);
+  background: var(--paper); cursor: pointer; font-family: "DM Mono", monospace; font-size: 11px;
+  text-transform: uppercase; letter-spacing: 0.08em; color: var(--ink); text-align: left;
+  transition: background 0.12s ease; }
+.riso .role-more:hover { background: var(--hi); }
+
+@media (max-width: 980px) {
+  .riso .schema-strip { grid-template-columns: repeat(2, 1fr); }
+  .riso .role-grid { grid-template-columns: 1fr; }
+  .riso .role-card { min-height: 0; }
+}
 
 /* ---------- line chart ---------- */
 .riso .chartcard { border: 2px solid var(--ink); background: var(--paper-2); padding: 14px; }

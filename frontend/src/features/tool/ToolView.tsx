@@ -16,62 +16,140 @@ import { daNum, pct } from "../../lib/format";
 import { useFixtures } from "../../fixtures";
 import "./riso.css";
 
-const roleLabel: Record<string, string> = { Maal: "mål", Dimension: "dimension", Tid: "tid" };
 type DiscMode = "vaelg" | "soeg";
 
-// Columns section — wide schemas (>10 rows) collapse to the first 10 with
-// an expand toggle so categorical sources like Trafiktal don't drown the page.
+// Schema overview band — four KPI strips above the role-cards, gives a
+// one-glance read of the dataset's anatomy before drilling into roles.
+function SchemaOverview({ profile }: { profile: DatasetProfile }) {
+  const cols = profile.columns;
+  const measures = cols.filter((c) => c.role === "Maal");
+  const dims = cols.filter((c) => c.role === "Dimension");
+  const times = cols.filter((c) => c.role === "Tid");
+  const avgNull = cols.reduce((a, c) => a + c.nullRatio, 0) / Math.max(cols.length, 1);
+  const quality = avgNull < 0.01 ? "fuld" : avgNull < 0.05 ? "god" : avgNull < 0.2 ? "ok" : "lav";
+  const qTone = avgNull < 0.05 ? "good" : avgNull < 0.2 ? "mid" : "warn";
+  return (
+    <div className="schema-strip">
+      <div className="ss-kpi">
+        <span className="ss-lab">Observationer</span>
+        <span className="ss-v tnum">{daNum(profile.rowCount)}</span>
+        <span className="ss-sub">rækker i alt</span>
+      </div>
+      <div className="ss-kpi">
+        <span className="ss-lab">Skema-bredde</span>
+        <span className="ss-v tnum">{cols.length}</span>
+        <span className="ss-sub">{measures.length} mål · {dims.length} dim · {times.length} tid</span>
+      </div>
+      <div className="ss-kpi">
+        <span className="ss-lab">Tidsspand</span>
+        <span className="ss-v">{profile.period ?? "—"}</span>
+        <span className="ss-sub">{times.length > 0 ? `${times[0].cardinality} skiver` : "ingen tidsakse"}</span>
+      </div>
+      <div className={`ss-kpi q-${qTone}`}>
+        <span className="ss-lab">Datakvalitet</span>
+        <span className="ss-v">{quality}</span>
+        <span className="ss-sub">{pct(avgNull, 1)} manglende i snit</span>
+      </div>
+    </div>
+  );
+}
+
+// Role-card: one of MÅL / DIMENSIONER / TID. Lists columns inside the role,
+// each with its name + type + a contextual value (range for measures,
+// cardinality for dimensions, period for time). Long lists collapse to the
+// first 3 items with a disclosure toggle so cards stay symmetric.
+function RoleCard({
+  variant, label, columns, formatItem,
+}: {
+  variant: "maal" | "dim" | "tid";
+  label: string;
+  columns: DatasetProfile["columns"];
+  formatItem: (c: DatasetProfile["columns"][number]) => { sub: string; mini?: number };
+}) {
+  const [open, setOpen] = useState(false);
+  const limit = 3;
+  const overflow = columns.length > limit;
+  const shown = open || !overflow ? columns : columns.slice(0, limit);
+  return (
+    <div className="role-card">
+      <div className={`role-head r-${variant}`}>
+        <span className="role-lab">{label}</span>
+        <span className="role-count tnum">{columns.length}</span>
+      </div>
+      <div className="role-list">
+        {columns.length === 0 && (
+          <div className="role-empty">Ingen {label.toLowerCase()} i dette datasæt.</div>
+        )}
+        {shown.map((c) => {
+          const { sub, mini } = formatItem(c);
+          return (
+            <div className="role-item" key={c.name}>
+              <div className="role-item-top">
+                <span className="role-nm mono">{c.name}</span>
+                <span className="role-ty mono">{c.type}</span>
+              </div>
+              <div className="role-sub">{sub}</div>
+              {mini !== undefined && (
+                <div className="role-bar" aria-hidden="true">
+                  <span className="role-bar-fill" style={{ width: `${Math.max(2, mini * 100)}%` }} />
+                </div>
+              )}
+            </div>
+          );
+        })}
+      </div>
+      {overflow && (
+        <button type="button" className="role-more" aria-expanded={open} onClick={() => setOpen((v) => !v)}>
+          {open ? `Skjul ${columns.length - limit} ekstra` : `Vis alle ${columns.length} →`}
+        </button>
+      )}
+    </div>
+  );
+}
+
 function ColumnsSection({ profile }: { profile: DatasetProfile }) {
-  const [expanded, setExpanded] = useState(false);
-  const limit = 10;
-  const total = profile.columns.length;
-  const overflow = total > limit;
-  const shown = expanded || !overflow ? profile.columns : profile.columns.slice(0, limit);
+  const cols = profile.columns;
+  const measures = cols.filter((c) => c.role === "Maal");
+  const dims = cols.filter((c) => c.role === "Dimension");
+  const times = cols.filter((c) => c.role === "Tid");
+  const maxCard = Math.max(...dims.map((c) => c.cardinality), 1);
   return (
     <section className="sect" id="s-kolonner" aria-label="Kolonner">
       <div className="sect-head"><span className="no">06</span><h2>Kolonner &amp; værdier</h2>
-        <span className="meta">{overflow && !expanded ? `viser ${limit} af ${total}` : `${total} kolonner`}</span>
+        <span className="meta">{cols.length} kolonner · grupperet efter rolle</span>
       </div>
-      <div className="tablecard">
-        <table>
-          <caption>Hver kolonnes rolle, type, værdi-interval og antal distinkte værdier</caption>
-          <thead>
-            <tr>
-              <th scope="col">Kolonne</th><th scope="col">Rolle</th><th scope="col">Type</th>
-              <th scope="col" className="num">Min</th><th scope="col" className="num">Max</th><th scope="col" className="num">Distinkte</th>
-            </tr>
-          </thead>
-          <tbody>
-            {shown.map((c) => (
-              <tr key={c.name}>
-                <td className="mono">{c.name}</td>
-                <td><span className={`pill role-${c.role.toLowerCase()}`}>{roleLabel[c.role]}</span></td>
-                <td className="mono">{c.type}</td>
-                <td className="num tnum">{c.min !== null ? daNum(c.min) : "—"}</td>
-                <td className="num tnum">{c.max !== null ? daNum(c.max) : "—"}</td>
-                <td className="num tnum">{daNum(c.cardinality)}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+      <SchemaOverview profile={profile} />
+      <div className="role-grid">
+        <RoleCard variant="maal" label="Mål" columns={measures}
+          formatItem={(c) => ({
+            sub: c.min !== null && c.max !== null
+              ? `Spænder fra ${daNum(c.min)} til ${daNum(c.max)} · ${daNum(c.cardinality)} unikke værdier`
+              : `${daNum(c.cardinality)} unikke værdier`,
+          })} />
+        <RoleCard variant="dim" label="Dimensioner" columns={dims}
+          formatItem={(c) => ({
+            sub: `${daNum(c.cardinality)} distinkt${c.cardinality === 1 ? "" : "e"} værdi${c.cardinality === 1 ? "" : "er"}${c.nullRatio > 0 ? ` · ${pct(c.nullRatio, 1)} mangler` : ""}`,
+            mini: c.cardinality / maxCard,
+          })} />
+        <RoleCard variant="tid" label="Tid" columns={times}
+          formatItem={(c) => ({
+            sub: profile.period
+              ? `${daNum(c.cardinality)} tidsskiver · ${profile.period}`
+              : `${daNum(c.cardinality)} tidsskiver`,
+          })} />
       </div>
-      {overflow && (
-        <button type="button" className="cols-toggle" onClick={() => setExpanded((v) => !v)}>
-          {expanded ? `Skjul ${total - limit} ekstra kolonner` : `Vis alle ${total} kolonner →`}
-        </button>
-      )}
     </section>
   );
 }
 
-// One-line plain-language gist per finding type — used inside the "Hvorfor"
-// expander on each fund card.
+// Plain-language gist per finding type — used inside the "Hvorfor"
+// expander on each fund card. Hverdagssprog, ingen statistik-jargon.
 const FUND_WHY: Record<FindingType, string> = {
-  Trend: "Variablen bevæger sig systematisk over tid — ikke tilfældig støj.",
-  Anomali: "En enkelt værdi falder uden for det forventede mønster.",
-  Korrelation: "To variable bevæger sig sammen — ændring i den ene følger den anden.",
-  Segment: "Et segment skiller sig markant ud fra resten af fordelingen.",
-  Koncentration: "Få elementer tegner sig for en stor andel af det samlede.",
+  Trend: "Tallene går ikke tilfældigt op og ned — der er en klar retning over tid. Det er værd at undersøge hvad der driver bevægelsen.",
+  Anomali: "Én værdi stikker af fra de andre — den ligner ikke resten af mønstret. Det kan være en fejl i data, en særlig hændelse, eller et nyt mønster der opstår.",
+  Korrelation: "Når den ene ting ændrer sig, gør den anden det også — de hænger sammen. Det betyder ikke nødvendigvis at den ene forårsager den anden, men der er en sammenhæng der kan forklare en del af variationen.",
+  Segment: "Ét segment opfører sig markant anderledes end de andre — enten meget højere eller meget lavere. Det er ofte her interessante historier ligger.",
+  Koncentration: "Få elementer ejer størstedelen af det samlede — fordelingen er skæv. Det betyder at en lille gruppe har stor indflydelse på totalen.",
 };
 
 // One finding as a boxed card — verdict + interestingness + expandable
@@ -393,13 +471,13 @@ export default function ToolView() {
               <section className="sect" id="s-udvikling" aria-label="Udvikling over tid">
                 <div className="sect-head"><span className="no">02</span><h2>Udvikling over tid</h2>
                   <span className="meta">{stats.series[0].label}–{stats.series[stats.series.length - 1].label}</span>
-                </div>
-                <div className="seg seg-sm" role="group" aria-label="Visning">
-                  <button type="button" aria-pressed={trendView === "samlet"} onClick={() => setTrendView("samlet")}>Samlet</button>
-                  {stats.segmentSeries.length > 0 && (
-                    <button type="button" aria-pressed={trendView === "segment"} onClick={() => setTrendView("segment")}>Pr. segment</button>
-                  )}
-                  <button type="button" aria-pressed={trendView === "tabel"} onClick={() => setTrendView("tabel")}>Tabel</button>
+                  <div className="seg seg-inline" role="group" aria-label="Visning">
+                    <button type="button" aria-pressed={trendView === "samlet"} onClick={() => setTrendView("samlet")}>Samlet</button>
+                    {stats.segmentSeries.length > 0 && (
+                      <button type="button" aria-pressed={trendView === "segment"} onClick={() => setTrendView("segment")}>Pr. segment</button>
+                    )}
+                    <button type="button" aria-pressed={trendView === "tabel"} onClick={() => setTrendView("tabel")}>Tabel</button>
+                  </div>
                 </div>
                 {trendView === "samlet" && <TrendChart series={stats.series} label={stats.measure?.column ?? "Mål"} />}
                 {trendView === "segment" && stats.segmentSeries.length > 0 && <MultiLineChart series={stats.segmentSeries} />}
