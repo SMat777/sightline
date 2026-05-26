@@ -2,7 +2,7 @@
 
 A data exploration tool for Danish open data. Pick a source, browse by topic, point at a dataset — Sightline profiles the columns, computes a stat-pack, and ranks the signals worth looking at (trend, anomaly, segment, correlation, concentration).
 
-**Live demo:** [https://YOUR-VERCEL-URL](https://YOUR-VERCEL-URL) *(coming after first Vercel deploy)*
+**Live demo:** [sightline-gamma.vercel.app](https://sightline-gamma.vercel.app)
 **Stack:** React 19 · TypeScript 6 · Vite 8 · Recharts · .NET 10 · ASP.NET Core · Scalar
 
 ![Sightline — FOLK1A loaded](frontend/public/screenshots/hero.png)
