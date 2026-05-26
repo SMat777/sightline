@@ -125,7 +125,7 @@ body { background: #f3eddc; }
 .riso .dso-facts b { color: var(--ink); font-weight: 600; }
 
 /* ---------- sticky section sub-nav ---------- */
-.riso .subnav { position: sticky; top: 56px; z-index: 90; display: flex; flex-wrap: wrap; gap: 6px;
+.riso .subnav { position: sticky; top: 64px; z-index: 90; display: flex; flex-wrap: wrap; gap: 6px;
   background: var(--paper); border-bottom: 2px solid var(--ink); padding: 10px 0; margin-top: 14px; }
 .riso .subnav a { font-family: "Space Grotesk", sans-serif; font-size: 15px; font-weight: 500;
   letter-spacing: 0; padding: 8px 14px; border: 2px solid transparent; color: var(--p2); text-decoration: none; min-height: 38px; display: inline-flex; align-items: center; transition: color 0.12s ease, border-color 0.12s ease; }
@@ -151,16 +151,27 @@ body { background: #f3eddc; }
 .riso .panel-note { font-family: "DM Mono", monospace; font-size: 11.5px; color: var(--p2);
   margin-top: 14px; }
 
-/* ---------- detection banner ---------- */
-.riso .detect { display: flex; gap: 14px; align-items: center; border: 2px solid var(--ink);
-  background: var(--p1); color: #fff; padding: 12px 16px; margin-bottom: 14px; flex-wrap: wrap; }
-.riso .detect .ico { width: 24px; height: 24px; flex: none; }
-.riso .detect .ico circle, .riso .detect .ico path { stroke: #fff; fill: none; stroke-width: 2; }
-.riso .detect .txt { font-size: 14px; }
-.riso .detect .txt b { font-family: "DM Mono", monospace; }
-.riso .detect .roles { display: flex; gap: 6px; margin-left: auto; flex-wrap: wrap; }
-.riso .detect .rp { font-family: "DM Mono", monospace; font-size: 11px; border: 2px solid #fff; padding: 3px 9px; }
-.riso .detect .rp.off { opacity: 0.5; border-style: dashed; }
+/* ---------- detection banner (demoted: insight headline does the heavy lifting now) ---------- */
+.riso .detect-mini { display: flex; gap: 12px; align-items: center; flex-wrap: wrap;
+  font-family: "Space Grotesk", sans-serif; font-size: 13px; color: var(--p2);
+  padding: 8px 0 12px; border-bottom: 1px solid var(--hair); margin-bottom: 14px; }
+.riso .detect-mini .txt b { font-weight: 700; color: var(--ink); }
+.riso .detect-mini .roles { display: flex; gap: 6px; margin-left: auto; flex-wrap: wrap; }
+.riso .detect-mini .rp { font-family: "DM Mono", monospace; font-size: 11px; border: 2px solid var(--p2);
+  color: var(--p2); padding: 2px 8px; }
+.riso .detect-mini .rp.off { opacity: 0.45; border-style: dashed; }
+
+/* ---------- data-quality chip (one-line trust signal) ---------- */
+.riso .qchip { display: inline-flex; flex-wrap: wrap; align-items: center; gap: 8px;
+  font-family: "Space Grotesk", sans-serif; font-size: 13.5px; color: var(--ink);
+  border: 2px solid var(--ink); background: var(--paper-2); padding: 7px 14px; margin-bottom: 14px; }
+.riso .qchip-lab { color: var(--p2); }
+.riso .qchip strong { font-weight: 700; }
+.riso .qchip-sep { color: var(--hair); }
+.riso .qchip.good strong { color: var(--p1); }
+.riso .qchip.mid strong { color: var(--hi); }
+.riso .qchip.warn { border-color: var(--ano-deep); }
+.riso .qchip.warn strong { color: var(--ano-deep); }
 
 /* ---------- stat-pack cards ---------- */
 .riso .pack { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; }
@@ -251,6 +262,27 @@ body { background: #f3eddc; }
 .riso .scoreline { display: flex; gap: 16px; align-items: center; font-size: 11.5px; color: var(--p2); }
 .riso .scoreline b { color: var(--p1); }
 .riso .scoreline .conf { margin-left: auto; color: var(--p1); letter-spacing: 2px; }
+
+/* ---------- fund-card "Hvorfor"-expander ---------- */
+.riso .fcard-why { margin-top: 4px; border-top: 1px solid var(--hair); padding-top: 8px; }
+.riso .fcard-why summary { font-family: "Space Grotesk", sans-serif; font-size: 13px; font-weight: 600;
+  color: var(--p1); cursor: pointer; list-style: none; user-select: none; padding: 4px 0; }
+.riso .fcard-why summary::-webkit-details-marker { display: none; }
+.riso .fcard-why summary::before { content: "+ "; color: var(--p1); font-weight: 700; }
+.riso .fcard-why[open] summary::before { content: "− "; }
+.riso .fcard-why p { font-size: 13.5px; color: var(--ink); margin: 8px 0 12px; line-height: 1.42; }
+.riso .why-scores { display: grid; grid-template-columns: 1fr 1fr; gap: 6px 16px; margin: 0; font-family: "DM Mono", monospace; font-size: 11px; }
+.riso .why-scores > div { display: grid; grid-template-columns: 80px 1fr; gap: 8px; align-items: center; }
+.riso .why-scores dt { color: var(--p2); letter-spacing: 0.04em; }
+.riso .why-scores dd { margin: 0; display: flex; align-items: center; gap: 6px; color: var(--ink); position: relative; }
+.riso .why-bar { display: inline-block; height: 6px; background: var(--p1); border: 1px solid var(--ink); flex: none; }
+
+/* columns-section expand toggle */
+.riso .cols-toggle { display: inline-block; margin-top: 12px; padding: 9px 18px;
+  border: 2px solid var(--ink); background: transparent; cursor: pointer;
+  font-family: "Space Grotesk", sans-serif; font-size: 14px; font-weight: 500; color: var(--ink);
+  transition: transform 0.15s ease, box-shadow 0.15s ease; }
+.riso .cols-toggle:hover { transform: translate(-2px, -2px); box-shadow: 4px 4px 0 var(--ink); }
 
 /* ---------- line chart ---------- */
 .riso .chartcard { border: 2px solid var(--ink); background: var(--paper-2); padding: 14px; }

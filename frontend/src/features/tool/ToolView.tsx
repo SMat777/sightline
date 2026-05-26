@@ -19,7 +19,64 @@ import "./riso.css";
 const roleLabel: Record<string, string> = { Maal: "mål", Dimension: "dimension", Tid: "tid" };
 type DiscMode = "vaelg" | "soeg";
 
-// One finding as a boxed card — verdict + interestingness, no chart.
+// Columns section — wide schemas (>10 rows) collapse to the first 10 with
+// an expand toggle so categorical sources like Trafiktal don't drown the page.
+function ColumnsSection({ profile }: { profile: DatasetProfile }) {
+  const [expanded, setExpanded] = useState(false);
+  const limit = 10;
+  const total = profile.columns.length;
+  const overflow = total > limit;
+  const shown = expanded || !overflow ? profile.columns : profile.columns.slice(0, limit);
+  return (
+    <section className="sect" id="s-kolonner" aria-label="Kolonner">
+      <div className="sect-head"><span className="no">06</span><h2>Kolonner &amp; værdier</h2>
+        <span className="meta">{overflow && !expanded ? `viser ${limit} af ${total}` : `${total} kolonner`}</span>
+      </div>
+      <div className="tablecard">
+        <table>
+          <caption>Hver kolonnes rolle, type, værdi-interval og antal distinkte værdier</caption>
+          <thead>
+            <tr>
+              <th scope="col">Kolonne</th><th scope="col">Rolle</th><th scope="col">Type</th>
+              <th scope="col" className="num">Min</th><th scope="col" className="num">Max</th><th scope="col" className="num">Distinkte</th>
+            </tr>
+          </thead>
+          <tbody>
+            {shown.map((c) => (
+              <tr key={c.name}>
+                <td className="mono">{c.name}</td>
+                <td><span className={`pill role-${c.role.toLowerCase()}`}>{roleLabel[c.role]}</span></td>
+                <td className="mono">{c.type}</td>
+                <td className="num tnum">{c.min !== null ? daNum(c.min) : "—"}</td>
+                <td className="num tnum">{c.max !== null ? daNum(c.max) : "—"}</td>
+                <td className="num tnum">{daNum(c.cardinality)}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+      {overflow && (
+        <button type="button" className="cols-toggle" onClick={() => setExpanded((v) => !v)}>
+          {expanded ? `Skjul ${total - limit} ekstra kolonner` : `Vis alle ${total} kolonner →`}
+        </button>
+      )}
+    </section>
+  );
+}
+
+// One-line plain-language gist per finding type — used inside the "Hvorfor"
+// expander on each fund card.
+const FUND_WHY: Record<FindingType, string> = {
+  Trend: "Variablen bevæger sig systematisk over tid — ikke tilfældig støj.",
+  Anomali: "En enkelt værdi falder uden for det forventede mønster.",
+  Korrelation: "To variable bevæger sig sammen — ændring i den ene følger den anden.",
+  Segment: "Et segment skiller sig markant ud fra resten af fordelingen.",
+  Koncentration: "Få elementer tegner sig for en stor andel af det samlede.",
+};
+
+// One finding as a boxed card — verdict + interestingness + expandable
+// "why" with score breakdown. Confidence dots carry an aria-label so
+// screen-readers don't get only shape.
 function FundCard({ f, rank }: { f: Finding; rank: number }) {
   const i = f.interessanthed;
   const dots = Math.max(0, Math.min(4, Math.round(i.sikkerhed * 4)));
@@ -30,8 +87,20 @@ function FundCard({ f, rank }: { f: Finding; rank: number }) {
       <div className="scoreline mono">
         <span>styrke <b>{pct(i.styrke)}</b></span>
         <span>overrask. <b>{pct(i.overraskelse)}</b></span>
-        <span className="conf" title="Sikkerhed">{"●".repeat(dots)}{"○".repeat(4 - dots)}</span>
+        <span className="conf" aria-label={`Sikkerhed: ${dots} af 4`}>
+          <span aria-hidden="true">{"●".repeat(dots)}{"○".repeat(4 - dots)}</span>
+        </span>
       </div>
+      <details className="fcard-why">
+        <summary>Hvorfor er det interessant?</summary>
+        <p>{FUND_WHY[f.type]}</p>
+        <dl className="why-scores">
+          <div><dt>Styrke</dt><dd><span className="why-bar" style={{ width: `${i.styrke * 100}%` }} />{pct(i.styrke)}</dd></div>
+          <div><dt>Overraskelse</dt><dd><span className="why-bar" style={{ width: `${i.overraskelse * 100}%` }} />{pct(i.overraskelse)}</dd></div>
+          <div><dt>Sikkerhed</dt><dd><span className="why-bar" style={{ width: `${i.sikkerhed * 100}%` }} />{pct(i.sikkerhed)}</dd></div>
+          <div><dt>Dækning</dt><dd><span className="why-bar" style={{ width: `${i.daekning * 100}%` }} />{pct(i.daekning)}</dd></div>
+        </dl>
+      </details>
     </article>
   );
 }
@@ -426,34 +495,7 @@ export default function ToolView() {
               </section>
             )}
 
-            <section className="sect" id="s-kolonner" aria-label="Kolonner">
-              <div className="sect-head"><span className="no">06</span><h2>Kolonner &amp; værdier</h2>
-                <span className="meta">min/max udledt ved profilering</span>
-              </div>
-              <div className="tablecard">
-                <table>
-                  <caption>Hver kolonnes rolle, type, værdi-interval og antal distinkte værdier</caption>
-                  <thead>
-                    <tr>
-                      <th scope="col">Kolonne</th><th scope="col">Rolle</th><th scope="col">Type</th>
-                      <th scope="col" className="num">Min</th><th scope="col" className="num">Max</th><th scope="col" className="num">Distinkte</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {profile.columns.map((c) => (
-                      <tr key={c.name}>
-                        <td className="mono">{c.name}</td>
-                        <td><span className={`pill role-${c.role.toLowerCase()}`}>{roleLabel[c.role]}</span></td>
-                        <td className="mono">{c.type}</td>
-                        <td className="num tnum">{c.min !== null ? daNum(c.min) : "—"}</td>
-                        <td className="num tnum">{c.max !== null ? daNum(c.max) : "—"}</td>
-                        <td className="num tnum">{daNum(c.cardinality)}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </section>
+            <ColumnsSection profile={profile} />
           </>
         )}
 

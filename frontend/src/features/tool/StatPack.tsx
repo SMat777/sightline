@@ -117,6 +117,27 @@ function StructView({ stats, profile }: { stats: StatPackData; profile: DatasetP
   );
 }
 
+// Quick data-quality chip — aggregates null-ratio + role coverage from the
+// profile into a single confidence-level line above the stat-pack.
+function QualityChip({ profile }: { profile: DatasetProfile }) {
+  const cols = profile.columns;
+  const nullsHigh = cols.filter((c) => c.nullRatio > 0.5).length;
+  const nullsAny = cols.filter((c) => c.nullRatio > 0).length;
+  const avgNull = cols.reduce((a, c) => a + c.nullRatio, 0) / Math.max(cols.length, 1);
+  const verdict = nullsHigh > 0 ? "blandet" : avgNull > 0.05 ? "ok" : "god";
+  const tone = nullsHigh > 0 ? "warn" : avgNull > 0.05 ? "mid" : "good";
+  return (
+    <div className={`qchip ${tone}`}>
+      <span className="qchip-lab">Datakvalitet:</span>
+      <strong>{verdict}</strong>
+      <span className="qchip-sep" aria-hidden="true">·</span>
+      <span>{pct(avgNull, 1)} nuller i snit</span>
+      <span className="qchip-sep" aria-hidden="true">·</span>
+      <span>{cols.length - nullsAny}/{cols.length} kolonner uden huller</span>
+    </div>
+  );
+}
+
 export default function StatPack({ stats, profile }: { stats: StatPackData; profile: DatasetProfile }) {
   const [showForm, setShowForm] = useState(false);
   const m = stats.measure;
@@ -125,12 +146,13 @@ export default function StatPack({ stats, profile }: { stats: StatPackData; prof
 
   return (
     <div>
-      <div className="detect" role="status">
-        <svg className="ico" viewBox="0 0 26 26" aria-hidden="true"><circle cx="11" cy="11" r="7" /><path d="M16 16l6 6" strokeLinecap="round" /></svg>
+      <QualityChip profile={profile} />
+
+      <div className="detect-mini" role="status">
         <span className="txt">
           {canAuto
-            ? <>Form genkendt → stat-pack regnet for <b>{daNum(stats.segmentCount || stats.rowCount)}</b> {stats.hasDimension ? "segmenter" : "datapunkter"}.</>
-            : <>Kun struktur fundet — ingen tal at aggregere.</>}
+            ? <>Stat-pack regnet for <b>{daNum(stats.segmentCount || stats.rowCount)}</b> {stats.hasDimension ? "segmenter" : "datapunkter"}</>
+            : <>Kun struktur fundet — ingen tal at aggregere</>}
         </span>
         <span className="roles">
           <RoleChip on={stats.hasMeasure} glyph="↗" label="mål" />
@@ -149,15 +171,18 @@ export default function StatPack({ stats, profile }: { stats: StatPackData; prof
       {auto && m ? (
         <div className="pack">
           {(() => {
-            // One series shared across the time-aware cells. Empty for datasets without time.
+            // Sparkline only on the Σ feat cell — drawing the same shape under
+            // mean/max/min implied four different metrics share one curve.
             const series = stats.hasTime && stats.series.length > 1 ? stats.series.map((p) => p.value) : undefined;
+            const sumCtx = `${daNum(m.count)} ${stats.hasDimension ? "segmenter" : "værdier"}`
+              + (stats.yoYPct !== null ? ` · ${signedPct(stats.yoYPct)} ${stats.yoYLabel}` : "")
+              + (stats.outlierCount > 0 ? ` · ⚠ ${stats.outlierCount} outliers` : "");
             return <>
               <StatCell feat glyph="Σ" lab={`${m.column} i alt`} value={compact(m.sum)}
-                ctx={`${daNum(m.count)} ${stats.hasDimension ? "segmenter" : "værdier"}${stats.yoYPct !== null ? ` · ${signedPct(stats.yoYPct)} ${stats.yoYLabel}` : ""}`}
-                series={series} />
-              <StatCell glyph="⌀" lab="Gennemsnit" value={daNum(m.mean)} ctx={`median ${daNum(m.median)}`} series={series} />
-              <StatCell glyph="↑" lab="Højeste" value={daNum(m.max)} ctx={stats.topSegments[0]?.key} series={series} />
-              <StatCell glyph="↓" lab="Laveste" value={daNum(m.min)} series={series} />
+                ctx={sumCtx} series={series} warn={stats.outlierCount > 0} />
+              <StatCell glyph="⌀" lab="Gennemsnit" value={daNum(m.mean)} ctx={`median ${daNum(m.median)}`} />
+              <StatCell glyph="↑" lab="Højeste" value={daNum(m.max)} ctx={stats.topSegments[0]?.key} />
+              <StatCell glyph="↓" lab="Laveste" value={daNum(m.min)} />
               {m.spanRatio !== null && <StatCell glyph="↔" lab="Spænd (top ÷ bund)" value={`×${daNum(m.spanRatio, 1)}`} />}
               <StatCell glyph="σ" lab="Std.afvigelse" value={daNum(m.stdDev)} />
               {stats.topShare !== null && <StatCell glyph="⊙" lab="Koncentration" value={pct(stats.topShare)}
