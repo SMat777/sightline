@@ -1,8 +1,8 @@
 # Sightline
 
-A data exploration tool for Danish open data. Pick a source, browse by topic, point at a dataset — Sightline profiles the columns, computes a stat-pack, and ranks the signals worth looking at (trend, anomaly, segment, correlation, concentration).
+Data exploration tool for Danish open data. 2 live sources · 9 subject trees · 5 signal scanners · stat-pack with 10 aggregate measures · ranked findings explained in one click.
 
-**Live demo:** [sightline-gamma.vercel.app](https://sightline-gamma.vercel.app)
+**Live:** [sightline-gamma.vercel.app](https://sightline-gamma.vercel.app)
 **Stack:** React 19 · TypeScript 6 · Vite 8 · Recharts · .NET 10 · ASP.NET Core · Scalar
 
 ![Sightline — FOLK1A loaded](frontend/public/screenshots/hero.png)
@@ -11,23 +11,31 @@ A data exploration tool for Danish open data. Pick a source, browse by topic, po
 
 ## What it does
 
-- **Two live sources.** Danmarks Statistik (subject-tree navigation + free-text search) and Open Data DK (CKAN). Pluggable behind one `IDataSource` interface.
-- **Auto-profile per dataset.** Every column gets a role (`Mål` / `Dimension` / `Tid`) and a type. The UI adapts: time series get a trend chart, dimensions get bar / waffle / area views, numerics get a histogram.
-- **Stat-pack at a glance.** Sum, mean, median, min, max, span ratio, std-dev, top-segment share, Gini, year-over-year, outlier count — computed server-side in one pass.
-- **Ranked findings.** Five scanners (trend, anomaly, segment, correlation, concentration) produce findings; the ranker mixes them on *strength · surprise · confidence · coverage*.
-- **Lens selector.** Bias the feed toward what you want to see (`stærk`, `overraskende`, `tids-trends`, `koncentration` …) without re-querying.
+- **Two live sources, one interface.** Danmarks Statistik (subject tree + search) and Open Data DK (CKAN). Pluggable behind one `IDataSource`.
+- **Profile any dataset in one round-trip.** Columns get a role (`Mål` · `Dimension` · `Tid`) and a type. The UI adapts: time series → trend chart, dimensions → bar / waffle / area, numerics → histogram.
+- **Stat-pack at a glance.** Sum, mean, median, min, max, span ratio, std-dev, Gini, year-over-year, outlier count — computed server-side in one pass.
+- **Five scanners, one ranker.** Trend, anomaly, segment, correlation, concentration. Findings ranked on *strength · surprise · confidence · coverage*; re-bias by lens with no extra request.
+- **Honest demo build.** `VITE_USE_FIXTURES=true` swaps the api-client to bundled snapshots so the Vercel build runs static. The header pill flips from `· live` to `· snapshot` so visitors know which mode they're in.
 
 ---
 
 ## Screen tour
 
-**Stat-pack — FOLK1A (Befolkningen den 1. i kvartalet).** Hero numbers, then the trend chart, segment breakdown, ranked findings, and column table.
+**Befolkningen den 1. i kvartalet (FOLK1A).** 200 rows, 5 regions, 18-year time series. The stat-pack hero, trend chart, segment breakdown, ranked findings and column table — every dataset gets this layout.
 
 ![FOLK1A full view](frontend/public/screenshots/folk1a-full.png)
 
-**Concentration story — ENEBR (Industriens energiforbrug).** Gini 0,67 means a few industries dominate; the segment view and findings surface that directly.
+**Nyregistrerede personbiler (BIL55).** Monthly registrations 2007 → 2026. Hero numbers, trend chart, the engine's findings about the 2020 dip and the EV-share shift.
+
+![BIL55 full view](frontend/public/screenshots/bil55-full.png)
+
+**Industriens energiforbrug (ENEBR).** Gini 0,67 means a few industries dominate. The concentration scanner surfaces it directly; the segment view and the histogram make it readable in seconds.
 
 ![ENEBR full view](frontend/public/screenshots/enebr-full.png)
+
+**Trafiktal (Københavns Kommune, Open Data DK).** Different source, different shape — no time series, 710 unique streets. Same dashboard adapts: the trend section folds, the segment chart fills the canvas.
+
+![Trafiktal full view](frontend/public/screenshots/trafiktal-full.png)
 
 ---
 
@@ -42,15 +50,15 @@ React + TS (Vite)  ──▶  .NET 10 API  ──http──▶  Danmarks Statist
                           └─ SignalEngine + 5 Scanners + Ranker   (findings + interestingness)
 ```
 
-The connectors return a `Dataset` (rows + typed columns). Every downstream service is pure: ColumnProfiler, StatsService, and each scanner take a `Dataset` and return a structured result. Memory cache keeps the same dataset profile across the four endpoints (profile / findings / stats) so the UI flow is one round-trip per click.
+The connectors return a `Dataset` (rows + typed columns). Every downstream service is pure: ColumnProfiler, StatsService, and each scanner take a `Dataset` and return a structured result. Memory cache keeps the same dataset profile across the three endpoints (profile · findings · stats) so one click = one round-trip.
 
 | Decision | Why |
 |---|---|
-| `IDataSource` boundary | Adding another open-data API is one connector + DI registration. The profiler, stats, and scanners don't care about the source. |
+| `IDataSource` boundary | Adding another open-data API is one connector + DI registration. The profiler, stats and scanners don't care about the source. |
 | Server-computed stat-pack | The aggregation is heavy; pushing it client-side would mean shipping every row. The API returns the summary, the UI just renders. |
 | Findings = pure functions | Each scanner is `(Dataset) -> IEnumerable<Finding>`. Tested in isolation, no mocks. |
 | Per-finding `Interestingness` | One ranker mixes strength, surprise, confidence, coverage. Re-ranking by lens is a client-side sort, no extra request. |
-| Hybrid demo build | `VITE_USE_FIXTURES=true` swaps the api-client to bundled JSON snapshots so the Vercel build runs without a backend. |
+| Hybrid demo build | `VITE_USE_FIXTURES=true` swaps the api-client to bundled JSON snapshots; the Vercel build runs without a backend. |
 
 ---
 
@@ -59,7 +67,7 @@ The connectors return a `Dataset` (rows + typed columns). Every downstream servi
 - 21 / 21 backend tests green (`dotnet test`)
 - Strict TypeScript · ESLint clean
 - 40 modules · ~280 kB JS / 15 kB CSS in the static demo build
-- Live (full-stack) and demo (static) modes share one frontend bundle, swapped by a build-time flag
+- Live and demo modes share one frontend bundle, swapped by a build-time flag
 
 ---
 
@@ -83,7 +91,7 @@ cd frontend && npm install && npm run dev
 cd frontend && VITE_USE_FIXTURES=true npm run build && npm run preview
 ```
 
-The bundled snapshots cover four datasets — FOLK1A, BIL55, ENEBR (Danmarks Statistik) and Trafiktal (Open Data DK) — captured on 2026-05-26.
+Bundled snapshots cover four datasets — FOLK1A, BIL55, ENEBR (Danmarks Statistik) and Trafiktal (Open Data DK) — captured 2026-05-26.
 
 ### Tests
 
