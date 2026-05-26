@@ -7,6 +7,20 @@ const OLIVE = "#5c6a38";
 const HONEY = "#d59a2c";
 const INK = "#232319";
 const HAIR = "rgba(35,35,25,0.27)";
+const ANO = "#a3431f"; // outlier marker — matches --ano-deep in riso.css
+
+// Outliers in a time series: |value - mean| > 3σ. Returns the indices we
+// should flag in the chart so a recruiter spots the unusual months instantly.
+function outlierIndices(vals: number[]): number[] {
+  if (vals.length < 4) return [];
+  const mean = vals.reduce((a, b) => a + b, 0) / vals.length;
+  const variance = vals.reduce((a, b) => a + (b - mean) ** 2, 0) / vals.length;
+  const sd = Math.sqrt(variance);
+  if (sd === 0) return [];
+  return vals
+    .map((v, i) => (Math.abs(v - mean) > 3 * sd ? i : -1))
+    .filter((i) => i >= 0);
+}
 
 const W = 760;
 const H = 260;
@@ -31,6 +45,7 @@ export default function TrendChart({ series, label }: { series: TimePoint[]; lab
   const first = series[0];
   const last = series[series.length - 1];
   const changePct = first.value !== 0 ? ((last.value - first.value) / Math.abs(first.value)) * 100 : 0;
+  const outliers = outlierIndices(vals);
 
   // sparse x labels: first, last, and a few evenly spaced between
   const ticks = Math.min(5, series.length);
@@ -40,7 +55,7 @@ export default function TrendChart({ series, label }: { series: TimePoint[]; lab
     <div className="chartcard">
       <svg
         className="linechart" viewBox={`0 0 ${W} ${H}`} role="img"
-        aria-label={`${label} fra ${first.label} (${daNum(first.value)}) til ${last.label} (${daNum(last.value)}), ${signedPct(changePct)} over perioden.`}
+        aria-label={`${label} fra ${first.label} (${daNum(first.value)}) til ${last.label} (${daNum(last.value)}), ${signedPct(changePct)} over perioden${outliers.length ? `, ${outliers.length} outliers fundet` : ""}.`}
       >
         {/* y gridlines + labels at min, mid, max */}
         {[max, (max + min) / 2, min].map((v, i) => (
@@ -54,6 +69,14 @@ export default function TrendChart({ series, label }: { series: TimePoint[]; lab
         {/* area + line */}
         <path d={area} fill={HONEY} opacity="0.16" />
         <path d={line} fill="none" stroke={OLIVE} strokeWidth="2.6" strokeLinejoin="round" strokeLinecap="round" />
+        {/* outliers — drawn before last marker so they sit under it visually */}
+        {outliers.map((i) => (
+          <g key={`o-${i}`}>
+            <circle cx={x(i)} cy={y(series[i].value)} r="6.5" fill="none" stroke={ANO} strokeWidth="2.4" />
+            <text x={x(i)} y={y(series[i].value) - 12} textAnchor="middle"
+              fontFamily="DM Mono" fontSize="11" fontWeight="700" fill={ANO}>!</text>
+          </g>
+        ))}
         {/* last-point marker */}
         <circle cx={x(series.length - 1)} cy={y(last.value)} r="5" fill={OLIVE} />
         {/* x labels */}
@@ -62,6 +85,13 @@ export default function TrendChart({ series, label }: { series: TimePoint[]; lab
             fontFamily="DM Mono" fontSize="11" fill={INK}>{series[i].label}</text>
         ))}
       </svg>
+      {outliers.length > 0 && (
+        <p className="chart-note">
+          <span className="chart-note-pip" aria-hidden="true">●</span>
+          {outliers.length} outlier{outliers.length === 1 ? "" : "s"} markeret — værdier &gt; 3σ fra gennemsnit
+          ({outliers.slice(0, 3).map((i) => series[i].label).join(", ")}{outliers.length > 3 ? "…" : ""}).
+        </p>
+      )}
     </div>
   );
 }

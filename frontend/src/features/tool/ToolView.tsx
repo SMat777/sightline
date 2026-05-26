@@ -6,6 +6,7 @@ import type {
   Source, SubjectRef, DatasetRef, DatasetProfile, Finding, FindingType, StatPack as StatPackData,
 } from "../../tool-types";
 import StatPack from "./StatPack";
+import InsightHeadline from "./InsightHeadline";
 import TrendChart from "./TrendChart";
 import MultiLineChart from "./MultiLineChart";
 import Histogram from "./Histogram";
@@ -275,7 +276,20 @@ export default function ToolView() {
         </div>
 
         {error && <p className="tool-error" role="alert">Kunne ikke hente data: {error}. Er API'et startet?</p>}
-        {loading && <p className="tool-loading">Henter &amp; profilerer…</p>}
+        {loading && (
+          <div className="tool-loading" role="status" aria-label="Henter og profilerer datasæt">
+            <div className="skel skel-overview" />
+            <div className="skel-grid">
+              <div className="skel skel-cell feat" />
+              <div className="skel skel-cell" />
+              <div className="skel skel-cell" />
+              <div className="skel skel-cell" />
+              <div className="skel skel-cell" />
+              <div className="skel skel-cell" />
+              <div className="skel skel-cell" />
+            </div>
+          </div>
+        )}
 
         {ready && (
           <>
@@ -302,6 +316,7 @@ export default function ToolView() {
               <div className="sect-head"><span className="no">01</span><h2>Nøgletal</h2>
                 <span className="meta">{stats.measure ? stats.measure.column : profile.title}{profile.unit ? ` · ${profile.unit}` : ""}</span>
               </div>
+              <InsightHeadline stats={stats} findings={findings} profile={profile} />
               <StatPack stats={stats} profile={profile} />
             </section>
 
