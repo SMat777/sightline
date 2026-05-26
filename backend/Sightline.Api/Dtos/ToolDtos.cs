@@ -4,9 +4,13 @@ namespace Sightline.Api.Dtos;
 
 public record SourceDto(string Id, string Name);
 
-public record DatasetRefDto(string Id, string Title, string? Org);
+public record SubjectDto(string Id, string Name);
 
-public record ColumnDto(string Name, string Role, string Type, int Cardinality, double NullRatio);
+public record DatasetRefDto(string Id, string Title, string? Org, string? Period, int? Variables);
+
+public record ColumnDto(
+    string Name, string Role, string Type, int Cardinality, double NullRatio,
+    double? Min, double? Max);
 
 public record DatasetProfileDto(
     string Id,
@@ -14,7 +18,39 @@ public record DatasetProfileDto(
     string Title,
     int RowCount,
     IReadOnlyList<ColumnDto> Columns,
-    string? Period);
+    string? Period,
+    string? Unit);
+
+// Stat-pack — relatable numbers per dataset (see Domain/StatPack).
+public record SegmentDto(string Key, double Value, double Share);
+
+public record TimePointDto(string Label, double Value);
+
+public record BucketDto(double From, double To, int Count);
+
+public record NamedSeriesDto(string Key, IReadOnlyList<TimePointDto> Points);
+
+public record MeasureStatsDto(
+    string Column, int Count, double Sum, double Mean, double Median,
+    double Min, double Max, double? SpanRatio, double StdDev);
+
+public record StatPackDto(
+    bool HasMeasure,
+    bool HasDimension,
+    bool HasTime,
+    int RowCount,
+    MeasureStatsDto? Measure,
+    IReadOnlyList<SegmentDto> TopSegments,
+    int SegmentCount,
+    double? TopShare,
+    double? Gini,
+    double? YoYPct,
+    string? YoYLabel,
+    int OutlierCount,
+    IReadOnlyList<TimePointDto> Series,
+    IReadOnlyList<BucketDto> Histogram,
+    IReadOnlyList<NamedSeriesDto> SegmentSeries,
+    IReadOnlyList<SegmentDto> AllSegments);
 
 public record InterestingnessDto(
     double Score, double Styrke, double Overraskelse, double Sikkerhed, double Daekning);

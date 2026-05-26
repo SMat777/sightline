@@ -21,4 +21,5 @@ public record Dataset(
     string Source,        // "danmarks-statistik" | "open-data-dk"
     string Title,
     IReadOnlyList<Column> Columns,
-    IReadOnlyList<IReadOnlyDictionary<string, object?>> Rows);
+    IReadOnlyList<IReadOnlyDictionary<string, object?>> Rows,
+    string? Unit = null); // measure unit when the source supplies it (DST: "Antal", "kr.")

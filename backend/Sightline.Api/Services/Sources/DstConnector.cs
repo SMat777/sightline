@@ -17,23 +17,51 @@ public sealed class DstConnector : IDataSource
 
     private readonly HttpClient _http;
     private IReadOnlyList<DstTableRef>? _tables;
+    private IReadOnlyList<DstSubject>? _subjects;
+    private readonly Dictionary<string, IReadOnlyList<DstTableRef>> _tablesBySubject = new();
 
     public DstConnector(IHttpClientFactory factory) => _http = factory.CreateClient();
 
     public string Source => "danmarks-statistik";
 
-    public async Task<IReadOnlyList<DatasetRef>> ListAsync(string? query, CancellationToken ct)
+    // Top-level subjects, minus the "Om Danmarks Statistik" housekeeping branch.
+    public async Task<IReadOnlyList<SubjectRef>> ListSubjectsAsync(CancellationToken ct)
     {
-        _tables ??= await _http.GetFromJsonAsync<List<DstTableRef>>(
-            $"{Base}/tables?format=JSON", ct) ?? [];
+        _subjects ??= await _http.GetFromJsonAsync<List<DstSubject>>(
+            $"{Base}/subjects?format=JSON", ct) ?? [];
+        return _subjects
+            .Where(s => s.Active && s.Id != "19")
+            .Select(s => new SubjectRef(s.Id, s.Description)).ToList();
+    }
 
-        IEnumerable<DstTableRef> hits = _tables;
+    public async Task<IReadOnlyList<DatasetRef>> ListAsync(string? query, string? subject, CancellationToken ct)
+    {
+        var tables = await TablesAsync(subject, ct);
+
+        IEnumerable<DstTableRef> hits = tables;
         if (!string.IsNullOrWhiteSpace(query))
-            hits = _tables.Where(t =>
+            hits = tables.Where(t =>
                 t.Id.Contains(query, StringComparison.OrdinalIgnoreCase) ||
                 t.Text.Contains(query, StringComparison.OrdinalIgnoreCase));
 
-        return hits.Take(50).Select(t => new DatasetRef(t.Id, t.Text, null)).ToList();
+        return hits.Take(50).Select(t => new DatasetRef(
+            t.Id, t.Text, null,
+            Period: t.FirstPeriod is not null && t.LatestPeriod is not null ? $"{t.FirstPeriod}–{t.LatestPeriod}" : null,
+            Variables: t.Variables?.Count)).ToList();
+    }
+
+    // Full table list (cached) or one subject's tables (cached per subject).
+    private async Task<IReadOnlyList<DstTableRef>> TablesAsync(string? subject, CancellationToken ct)
+    {
+        if (string.IsNullOrWhiteSpace(subject))
+            return _tables ??= await _http.GetFromJsonAsync<List<DstTableRef>>(
+                $"{Base}/tables?format=JSON", ct) ?? [];
+
+        if (_tablesBySubject.TryGetValue(subject, out var cached)) return cached;
+        var list = await _http.GetFromJsonAsync<List<DstTableRef>>(
+            $"{Base}/tables?subjects={Uri.EscapeDataString(subject)}&format=JSON", ct) ?? [];
+        _tablesBySubject[subject] = list;
+        return list;
     }
 
     public async Task<Dataset> FetchAsync(string datasetId, CancellationToken ct)
@@ -66,12 +94,13 @@ public sealed class DstConnector : IDataSource
         // CSV headers are the variable ids upper-cased; the measure column is INDHOLD.
         return Parse($"dst:{datasetId}", info.Text, csv,
             timeVar: timeVar.Id.ToUpperInvariant(),
-            dimVars: dims.Select(d => d.Id.ToUpperInvariant()).ToList());
+            dimVars: dims.Select(d => d.Id.ToUpperInvariant()).ToList(),
+            unit: info.Unit);
     }
 
     // Pure parser — separated so it can be unit-tested without the network.
     public static Dataset Parse(string id, string title, string csv, string timeVar,
-        IReadOnlyList<string> dimVars)
+        IReadOnlyList<string> dimVars, string? unit = null)
     {
         var lines = csv.Replace("﻿", "")
             .Split('\n', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
@@ -107,7 +136,7 @@ public sealed class DstConnector : IDataSource
         foreach (var d in dimVars) hints[d] = (ColumnRole.Dimension, ColumnType.Category);
 
         return new Dataset(id, "danmarks-statistik", title,
-            ColumnProfiler.FromHints(rows, hints), rows);
+            ColumnProfiler.FromHints(rows, hints), rows, unit);
     }
 
     private DstVariable PickPrimaryDimension(IReadOnlyList<DstVariable> dims)
@@ -155,8 +184,10 @@ public sealed class DstConnector : IDataSource
             CultureInfo.InvariantCulture, out var d) ? d : null;
     }
 
-    private sealed record DstTableRef(string Id, string Text);
+    private sealed record DstTableRef(
+        string Id, string Text, string? Unit, string? FirstPeriod, string? LatestPeriod, List<string>? Variables);
+    private sealed record DstSubject(string Id, string Description, bool Active);
     private sealed record DstVarValue(string Id, string Text);
     private sealed record DstVariable(string Id, string Text, List<DstVarValue> Values);
-    private sealed record DstTableInfo(string Id, string Text, List<DstVariable> Variables);
+    private sealed record DstTableInfo(string Id, string Text, string? Unit, List<DstVariable> Variables);
 }

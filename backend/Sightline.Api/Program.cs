@@ -33,6 +33,7 @@ builder.Services.AddScoped<ISignalScanner, CorrelationScanner>();
 builder.Services.AddScoped<ISignalScanner, ConcentrationScanner>();
 builder.Services.AddSingleton<Ranker>();
 builder.Services.AddScoped<ISignalEngine, SignalEngine>();
+builder.Services.AddScoped<IStatsService, StatsService>();
 
 builder.Services.AddScoped<IEnergyRepository, EnergyRepository>();
 builder.Services.AddScoped<IScoreService, ScoreService>();

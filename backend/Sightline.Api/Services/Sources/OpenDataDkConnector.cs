@@ -19,7 +19,11 @@ public sealed class OpenDataDkConnector : IDataSource
 
     public string Source => "open-data-dk";
 
-    public async Task<IReadOnlyList<DatasetRef>> ListAsync(string? query, CancellationToken ct)
+    // CKAN has groups, but no clean subject tree like DST — browse falls back to search.
+    public Task<IReadOnlyList<SubjectRef>> ListSubjectsAsync(CancellationToken ct) =>
+        Task.FromResult<IReadOnlyList<SubjectRef>>([]);
+
+    public async Task<IReadOnlyList<DatasetRef>> ListAsync(string? query, string? subject, CancellationToken ct)
     {
         var url = $"{Base}/package_search?q={Uri.EscapeDataString(query ?? "")}&rows=20";
         using var doc = JsonDocument.Parse(await _http.GetStringAsync(url, ct));
