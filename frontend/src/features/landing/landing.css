@@ -2,7 +2,7 @@
    Ported from docs/2026-05-26-landing-design-section-2.html preview-zones.
    Reuses RISO color tokens declared in riso.css :root scope. */
 
-.landing { max-width: 1180px; margin: 0 auto; padding: 0 32px; }
+.landing { max-width: 1180px; margin: 0 auto; padding: 0 34px; }
 .landing > section { scroll-margin-top: 80px; }
 
 /* ---------- hero ---------- */

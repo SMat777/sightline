@@ -14,7 +14,7 @@ export default function HeroSection() {
       </p>
       <div className="cta-row">
         <Link to="/tool" className="btn-primary">
-          Start en analyse →
+          Start analyse →
         </Link>
         <a href="#showcase" className="btn-secondary">
           Se eksempel

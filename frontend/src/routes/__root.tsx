@@ -19,7 +19,7 @@ function RootLayout() {
           </Link>
           <span className="spacer" />
           <a
-            className="nav-link"
+            className="btn btn-alt"
             href="https://github.com/SMat777/sightline"
             target="_blank"
             rel="noopener"
@@ -27,7 +27,7 @@ function RootLayout() {
             GitHub
           </a>
           <Link to="/tool" className="btn">
-            Åbn værktøjet
+            Start analyse
             <svg className="ar" viewBox="0 0 16 16" aria-hidden="true">
               <path d="M3 8h10M9 4l4 4-4 4" />
             </svg>

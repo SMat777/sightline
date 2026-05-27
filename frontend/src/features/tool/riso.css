@@ -62,6 +62,8 @@ body { background: #f3eddc; }
 .riso .btn:hover { transform: translate(-2px, -2px); }
 .riso .btn .ar { width: 15px; height: 15px; flex: none; }
 .riso .btn .ar path { stroke: #fff; stroke-width: 2.4; fill: none; }
+.riso .btn.btn-alt { background: var(--p1); color: #fff; text-decoration: none; }
+.riso .btn.btn-alt:hover { background: color-mix(in srgb, var(--p1) 85%, #000); }
 
 /* ---------- hero ---------- */
 .riso .hero { padding: 30px 0 6px; }
