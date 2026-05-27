@@ -60,7 +60,7 @@
 /* ---------- showcase window ---------- */
 .showcase { padding: 0 0 80px; display: flex; justify-content: center; }
 .showcase-frame {
-  width: 100%; max-width: 920px; box-sizing: border-box;
+  width: 100%; max-width: 720px; box-sizing: border-box;
   border: 2px solid var(--ink); background: var(--paper);
   box-shadow: 8px 8px 0 var(--ink); position: relative; overflow: hidden;
 }
