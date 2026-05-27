@@ -28,13 +28,13 @@ const stats: StatPack = {
   histogram: [], outlierCount: 0,
 };
 
-test("renders all 6 KPI cells with insight headline", () => {
+test("renders all 7 KPI cells with insight headline", () => {
   const findings: Finding[] = [];
   const { container } = render(
     <ShowcaseSlide profile={profile} stats={stats} findings={findings}
       active={true} topic="Borgere" />,
   );
-  expect(container.querySelectorAll(".sc").length).toBe(6);
+  expect(container.querySelectorAll(".sc").length).toBe(7);
   expect(container.querySelector(".slide-insight")).not.toBeNull();
   expect(container.querySelector(".topic")?.textContent).toBe("Borgere");
 });

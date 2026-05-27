@@ -28,7 +28,7 @@ export default function ShowcaseSlide({
         <span className="topic">{topic}</span>
       </div>
       <div className="slide-insight" role="note">{insight}</div>
-      <div className="slide-cells six">
+      <div className="slide-cells pack">
         <Cell feat lab={`${m.column} i alt`} value={compact(m.sum)}
           ctx={`${daNum(stats.segmentCount)} segmenter${stats.yoYPct !== null ? ` · ${signedPct(stats.yoYPct)} ${stats.yoYLabel}` : ""}`}
           hint={`${compact(m.sum)} samlet på tværs af ${daNum(m.count)} segmenter.`} />
@@ -42,6 +42,8 @@ export default function ShowcaseSlide({
           <Cell lab="Spændvidde" value={`×${daNum(m.spanRatio, 1)}`} ctx="max ÷ min"
             hint={`Højeste er ×${daNum(m.spanRatio, 1)} så stor som laveste.`} />
         )}
+        <Cell lab="Spredning" value={daNum(m.stdDev)} ctx="standardafvigelse"
+          hint={`Værdierne ligger typisk ±${daNum(m.stdDev)} fra gennemsnittet.`} />
         {showKonc && (
           <Cell lab="Koncentration" value={pct(stats.topShare as number)}
             ctx={stats.gini !== null ? `Gini ${daNum(stats.gini, 2)} · top 20%` : "top 20%"}

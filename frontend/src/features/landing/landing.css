@@ -138,17 +138,18 @@
   font-size: 22px; font-weight: 700; color: var(--p1);
   line-height: 0.7;
 }
-.slide-cells.six {
-  grid-template-columns: repeat(3, 1fr);
-  grid-template-rows: auto auto;
+.slide-cells.pack {
+  grid-template-columns: repeat(4, 1fr);
+  grid-auto-rows: 1fr;
   gap: 12px;
 }
-.slide-cells.six .sc {
-  min-height: 92px; padding: 12px 14px;
+.slide-cells.pack .sc {
+  min-height: 110px; padding: 14px 16px;
   display: flex; flex-direction: column; justify-content: space-between;
 }
-.slide-cells.six .sc .v { font-size: 28px; margin-top: 6px; }
-.slide-cells.six .sc.feat .v { font-size: 36px; }
+.slide-cells.pack .sc.feat { grid-column: span 2; }
+.slide-cells.pack .sc .v { font-size: 32px; margin-top: 4px; }
+.slide-cells.pack .sc.feat .v { font-size: 44px; color: var(--p1); }
 
 .sc .l { display: flex; align-items: center; gap: 6px; }
 .sc .l .q {
@@ -306,7 +307,8 @@
   .how-card .arrow { display: none; }
 }
 @media (max-width: 760px) {
-  .slide-cells.six { grid-template-columns: repeat(2, 1fr); }
+  .slide-cells.pack { grid-template-columns: repeat(2, 1fr); }
+  .slide-cells.pack .sc.feat { grid-column: span 2; }
 }
 @media (max-width: 680px) {
   .landing { padding: 0 24px; }
@@ -316,6 +318,7 @@
   .slide { inset: 20px 22px; }
 }
 @media (max-width: 520px) {
-  .slide-cells.six { grid-template-columns: 1fr; }
+  .slide-cells.pack { grid-template-columns: 1fr; }
+  .slide-cells.pack .sc.feat { grid-column: span 1; }
   .slide-spark { display: none; }
 }
