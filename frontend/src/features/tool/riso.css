@@ -65,6 +65,9 @@ body { background: #f3eddc; }
 
 /* ---------- hero ---------- */
 .riso .hero { padding: 30px 0 6px; }
+.riso .hero-head { display: flex; align-items: flex-start; gap: 24px; justify-content: space-between; flex-wrap: wrap; }
+.riso .hero-head .live { margin-top: 18px; }
+.riso .hero-cta { margin-top: 18px; }
 .riso .hero h1 { font-size: clamp(38px, 7vw, 80px); font-weight: 700; line-height: 0.86;
   letter-spacing: -0.03em; color: var(--p1); }
 .riso .hero .sub { max-width: 60ch; font-size: 15px; margin-top: 14px; }

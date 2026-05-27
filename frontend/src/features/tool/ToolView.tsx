@@ -331,34 +331,23 @@ export default function ToolView() {
   }, [ready, profile?.id, findings.length]);
 
   return (
-    <div className="riso">
-      <nav className="nav" aria-label="Primær">
-        <div className="row">
-          <a className="mark" href="#top" aria-label="Sightline, til toppen">
-            <svg className="glyph" viewBox="0 0 26 26" aria-hidden="true">
-              <circle className="a" cx="10" cy="13" r="9" /><circle className="b" cx="16" cy="13" r="9" />
-            </svg>
-            Sightline <small>RISO·03</small>
-          </a>
-          <span className="spacer" />
+    <div className="wrap" id="top">
+      <div className="hero">
+        <div className="hero-head">
+          <h1>FIND&nbsp;SIGNALET.</h1>
           <span className="live" aria-label={`Datakilde: ${sourceName}${useFixtures ? " (demo-snapshot)" : " (live)"}`}>
             <span className="dot" aria-hidden="true" /> {sourceName} · {useFixtures ? "snapshot" : "live"}
           </span>
-          <button className="btn" type="button" onClick={newAnalysis}>
-            Ny analyse
-            <svg className="ar" viewBox="0 0 16 16" aria-hidden="true"><path d="M3 8h10M9 4l4 4-4 4" /></svg>
-          </button>
         </div>
-      </nav>
-
-      <div className="wrap" id="top">
-        <div className="hero">
-          <h1>FIND&nbsp;SIGNALET.</h1>
-          <p className="sub">
-            Bladr i danske offentlige datakilder efter emne — Sightline aflæser hvert datasæt
-            og lægger de tal frem du kan forholde dig til.
-          </p>
-        </div>
+        <p className="sub">
+          Bladr i danske offentlige datakilder efter emne — Sightline aflæser hvert datasæt
+          og lægger de tal frem du kan forholde dig til.
+        </p>
+        <button className="btn hero-cta" type="button" onClick={newAnalysis}>
+          Ny analyse
+          <svg className="ar" viewBox="0 0 16 16" aria-hidden="true"><path d="M3 8h10M9 4l4 4-4 4" /></svg>
+        </button>
+      </div>
 
         {/* discovery: browse by topic (default) or search */}
         <div className="disc" id="kilde">
@@ -581,7 +570,6 @@ export default function ToolView() {
           <span className="tag">Bladr efter emne · tal i forgrunden · cards, ikke grafer.</span>
           <span className="tag">Sightline · DNA № 03 · konfigurerbart værktøj</span>
         </footer>
-      </div>
     </div>
   );
 }
