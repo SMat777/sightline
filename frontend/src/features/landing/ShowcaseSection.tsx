@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
-import { fetchProfile, fetchStats } from "../../tool-api";
-import type { DatasetProfile, StatPack } from "../../tool-types";
+import { fetchProfile, fetchStats, fetchFindings } from "../../tool-api";
+import type { DatasetProfile, StatPack, Finding } from "../../tool-types";
 import ShowcaseSlide from "./ShowcaseSlide";
 import { useShowcaseRotation } from "./useShowcaseRotation";
 
@@ -10,7 +10,7 @@ const SHOWCASE = [
   { id: "ENEBR", topic: "Miljø & energi" },
 ] as const;
 
-type Loaded = { profile: DatasetProfile; stats: StatPack; topic: string };
+type Loaded = { profile: DatasetProfile; stats: StatPack; findings: Finding[]; topic: string };
 
 export default function ShowcaseSection() {
   const [data, setData] = useState<Loaded[] | null>(null);
@@ -25,11 +25,14 @@ export default function ShowcaseSection() {
   useEffect(() => {
     let cancelled = false;
     Promise.all(
-      SHOWCASE.map(async (s) => ({
-        profile: await fetchProfile("danmarks-statistik", s.id),
-        stats: await fetchStats("danmarks-statistik", s.id),
-        topic: s.topic,
-      })),
+      SHOWCASE.map(async (s) => {
+        const [profile, stats, findings] = await Promise.all([
+          fetchProfile("danmarks-statistik", s.id),
+          fetchStats("danmarks-statistik", s.id),
+          fetchFindings("danmarks-statistik", s.id).catch(() => [] as Finding[]),
+        ]);
+        return { profile, stats, findings, topic: s.topic };
+      }),
     )
       .then((d) => {
         if (!cancelled) setData(d);
@@ -79,6 +82,7 @@ export default function ShowcaseSection() {
               key={d.profile.id}
               profile={d.profile}
               stats={d.stats}
+              findings={d.findings}
               topic={d.topic}
               active={i === index}
             />
