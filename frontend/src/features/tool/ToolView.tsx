@@ -67,7 +67,7 @@ function RoleCard({
   formatItem: (c: DatasetProfile["columns"][number]) => { sub: string; mini?: number };
 }) {
   const [open, setOpen] = useState(false);
-  const limit = 3;
+  const limit = 1;
   const overflow = columns.length > limit;
   const shown = open || !overflow ? columns : columns.slice(0, limit);
   return (
