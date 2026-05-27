@@ -7,7 +7,7 @@ const baseProfile: DatasetProfile = {
   columns: [], period: null, unit: null,
 };
 const baseStats: StatPack = {
-  hasMeasure: true, hasDimension: true,
+  hasMeasure: true, hasDimension: true, hasTime: false, rowCount: 100,
   measure: {
     column: "Befolkning", count: 5, sum: 6000000, mean: 1200000,
     median: 1244153, min: 593125, max: 1951065, spanRatio: 3.3, stdDev: 465789,
