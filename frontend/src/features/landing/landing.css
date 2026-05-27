@@ -2,7 +2,7 @@
    Ported from docs/2026-05-26-landing-design-section-2.html preview-zones.
    Reuses RISO color tokens declared in riso.css :root scope. */
 
-.landing { max-width: 1180px; margin: 0 auto; padding: 0 34px; }
+.landing { max-width: 1180px; width: 100%; margin: 0 auto; padding: 0 34px; box-sizing: border-box; }
 .landing > section { scroll-margin-top: 80px; }
 
 /* ---------- hero ---------- */
@@ -58,9 +58,9 @@
 .landing-hero .proof b { color: var(--ink); }
 
 /* ---------- showcase window ---------- */
-.showcase { padding: 0 0 80px; }
+.showcase { padding: 0 0 80px; display: flex; justify-content: center; }
 .showcase-frame {
-  margin: 0 auto; max-width: 920px;
+  width: 100%; max-width: 920px; box-sizing: border-box;
   border: 2px solid var(--ink); background: var(--paper);
   box-shadow: 8px 8px 0 var(--ink); position: relative; overflow: hidden;
 }
