@@ -55,10 +55,10 @@ body { background: #f3eddc; }
   text-transform: uppercase; border: 2px solid var(--ink); padding: 5px 10px;
   display: inline-flex; align-items: center; gap: 7px; }
 .riso .live .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--p1); }
-.riso .btn { font-family: "DM Mono", monospace; font-size: 13px; text-transform: uppercase;
-  letter-spacing: 0.08em; border: 2px solid var(--ink); background: var(--ano-deep); color: #fff;
-  padding: 9px 16px; display: inline-flex; align-items: center; gap: 8px; min-height: 42px;
-  cursor: pointer; transition: transform 0.18s ease; }
+.riso .btn { font-family: "Space Grotesk", sans-serif; font-size: 15px; font-weight: 600;
+  letter-spacing: 0; border: 2px solid var(--ink); background: var(--ano-deep); color: #fff;
+  padding: 10px 18px; display: inline-flex; align-items: center; gap: 8px; min-height: 42px;
+  cursor: pointer; transition: transform 0.18s ease; text-decoration: none; }
 .riso .btn:hover { transform: translate(-2px, -2px); }
 .riso .btn .ar { width: 15px; height: 15px; flex: none; }
 .riso .btn .ar path { stroke: #fff; stroke-width: 2.4; fill: none; }
