@@ -122,6 +122,74 @@
   font-feature-settings: "tnum" 1;
 }
 
+/* ---------- D-løft: insight + 6 KPI + sparkline ---------- */
+.slide-insight {
+  display: flex; gap: 10px; align-items: flex-start;
+  padding: 10px 14px; margin: 0 0 16px;
+  background: var(--paper-2); border: 1.5px solid var(--hair);
+  border-left: 3px solid var(--p1);
+  font-family: "Space Grotesk", sans-serif;
+  font-size: 14.5px; font-weight: 500; color: var(--ink);
+  line-height: 1.45;
+}
+.slide-insight::before {
+  content: "\201C";
+  font-family: "Space Grotesk", sans-serif;
+  font-size: 22px; font-weight: 700; color: var(--p1);
+  line-height: 0.7;
+}
+.slide-cells.six {
+  grid-template-columns: repeat(3, 1fr);
+  grid-template-rows: auto auto;
+  gap: 12px;
+}
+.slide-cells.six .sc {
+  min-height: 92px; padding: 12px 14px;
+  display: flex; flex-direction: column; justify-content: space-between;
+}
+.slide-cells.six .sc .v { font-size: 28px; margin-top: 6px; }
+.slide-cells.six .sc.feat .v { font-size: 36px; }
+
+.sc .l { display: flex; align-items: center; gap: 6px; }
+.sc .l .q {
+  display: inline-grid; place-content: center;
+  width: 13px; height: 13px; border: 1px solid var(--p2);
+  font-size: 9px; font-family: "Space Grotesk", sans-serif;
+  font-weight: 700; color: var(--p2); border-radius: 2px;
+  cursor: help; line-height: 1; position: relative;
+}
+.sc .l .q .qtip {
+  position: absolute; bottom: calc(100% + 6px); left: 50%;
+  transform: translateX(-50%);
+  background: var(--ink); color: var(--paper);
+  padding: 7px 10px; font-size: 11.5px; font-weight: 400;
+  font-family: "Space Grotesk", sans-serif; line-height: 1.4;
+  width: 220px; text-align: left; border: 2px solid var(--ink);
+  box-shadow: 3px 3px 0 var(--p1);
+  letter-spacing: 0; text-transform: none;
+  opacity: 0; pointer-events: none; transition: opacity 0.15s ease;
+  z-index: 10;
+}
+.sc .l .q:hover .qtip,
+.sc .l .q:focus .qtip { opacity: 1; }
+
+.slide-spark {
+  margin-top: 14px; border: 1.5px solid var(--hair);
+  background: var(--paper-2); padding: 8px 12px;
+  height: 60px; position: relative;
+}
+.slide-spark .lab {
+  position: absolute; top: 6px; left: 12px;
+  font-family: "DM Mono", monospace; font-size: 9.5px;
+  letter-spacing: 0.08em; color: var(--p2); text-transform: uppercase;
+}
+.slide-spark .rng {
+  position: absolute; bottom: 6px; right: 12px;
+  font-family: "DM Mono", monospace; font-size: 9.5px;
+  color: var(--p2); font-feature-settings: "tnum" 1;
+}
+.slide-spark svg { width: 100%; height: 100%; display: block; }
+
 .sw-dots {
   display: flex; justify-content: center; gap: 8px;
   padding: 14px 0 18px; background: var(--paper);
@@ -237,10 +305,17 @@
   .feat-grid, .how-works { grid-template-columns: 1fr; }
   .how-card .arrow { display: none; }
 }
+@media (max-width: 760px) {
+  .slide-cells.six { grid-template-columns: repeat(2, 1fr); }
+}
 @media (max-width: 680px) {
   .landing { padding: 0 24px; }
   .landing-hero { padding: 48px 0 40px; }
   .slide-cells { grid-template-columns: 1fr; }
   .sw-body { padding: 20px 22px; }
   .slide { inset: 20px 22px; }
+}
+@media (max-width: 520px) {
+  .slide-cells.six { grid-template-columns: 1fr; }
+  .slide-spark { display: none; }
 }
