@@ -1,0 +1,324 @@
+/* Landing-page styling — RISO·03 DNA scoped to .landing.
+   Ported from docs/2026-05-26-landing-design-section-2.html preview-zones.
+   Reuses RISO color tokens declared in riso.css :root scope. */
+
+.landing { max-width: 1180px; width: 100%; margin: 0 auto; padding: 0 34px; box-sizing: border-box; }
+.landing > section { scroll-margin-top: 80px; }
+
+/* ---------- hero ---------- */
+.landing-hero { padding: 80px 0 60px; text-align: center; }
+.landing-hero .pill {
+  display: inline-flex; align-items: center; gap: 8px;
+  font-family: "DM Mono", monospace; font-size: 11px;
+  letter-spacing: 0.08em; text-transform: uppercase; color: var(--p1);
+  background: var(--paper-2); border: 1.5px solid var(--p1);
+  padding: 6px 14px; border-radius: 999px; margin-bottom: 24px;
+}
+.landing-hero .pill::before {
+  content: ""; width: 6px; height: 6px;
+  background: var(--p1); border-radius: 50%;
+}
+.landing-hero h1 {
+  font-family: "Space Grotesk", sans-serif;
+  font-size: clamp(40px, 5.5vw, 76px);
+  font-weight: 700; line-height: 1.05; letter-spacing: -0.025em;
+  max-width: 18ch; margin: 0 auto 24px; color: var(--ink);
+}
+.landing-hero h1 span { color: var(--p1); }
+.landing-hero .sub {
+  font-family: "Space Grotesk", sans-serif;
+  font-size: 19px; line-height: 1.5; color: var(--p2);
+  max-width: 56ch; margin: 0 auto 36px;
+}
+.landing-hero .cta-row {
+  display: inline-flex; gap: 12px; flex-wrap: wrap; justify-content: center;
+}
+.landing-hero .btn-primary {
+  display: inline-flex; align-items: center; gap: 8px;
+  background: var(--ano-deep); color: #fff;
+  padding: 14px 24px; text-decoration: none;
+  font-family: "Space Grotesk", sans-serif;
+  font-size: 15px; font-weight: 600; border: 2px solid var(--ink);
+  cursor: pointer; transition: transform 0.15s ease;
+}
+.landing-hero .btn-primary:hover { transform: translate(-2px, -2px); box-shadow: 4px 4px 0 var(--ink); }
+.landing-hero .btn-secondary {
+  display: inline-flex; align-items: center; gap: 8px;
+  background: transparent; color: var(--ink);
+  padding: 14px 24px; text-decoration: none;
+  font-family: "Space Grotesk", sans-serif;
+  font-size: 15px; font-weight: 500; border: 2px solid var(--ink);
+  transition: transform 0.15s ease;
+}
+.landing-hero .btn-secondary:hover { transform: translate(-2px, -2px); box-shadow: 4px 4px 0 var(--ink); }
+.landing-hero .proof {
+  margin-top: 28px; font-family: "DM Mono", monospace;
+  font-size: 11px; letter-spacing: 0.08em; color: var(--p2); text-transform: uppercase;
+}
+.landing-hero .proof b { color: var(--ink); }
+
+/* ---------- showcase window ---------- */
+.showcase { padding: 0 0 80px; display: flex; justify-content: center; }
+.showcase-frame {
+  width: 100%; max-width: 1080px; box-sizing: border-box;
+  border: 2px solid var(--ink); background: var(--paper);
+  box-shadow: 8px 8px 0 var(--ink); position: relative; overflow: hidden;
+}
+.showcase-frame:focus { outline: none; }
+.showcase-frame:focus-visible { outline: 3px solid var(--ano); outline-offset: 4px; }
+.sw-bar {
+  height: 28px; background: var(--paper-2); border-bottom: 2px solid var(--ink);
+  display: flex; align-items: center; gap: 8px; padding: 0 14px;
+}
+.sw-bar .dot { width: 9px; height: 9px; border: 1.5px solid var(--ink); }
+.sw-bar .label {
+  margin-left: auto; font-family: "DM Mono", monospace; font-size: 10px;
+  letter-spacing: 0.08em; color: var(--p2); text-transform: uppercase;
+}
+.sw-body { padding: 28px 32px; min-height: 280px; position: relative; }
+
+.slide {
+  position: absolute; inset: 28px 32px;
+  opacity: 0; transition: opacity 350ms ease; pointer-events: none;
+}
+.slide.is-active { opacity: 1; position: relative; pointer-events: auto; }
+.slide-head {
+  display: flex; align-items: baseline; gap: 14px;
+  margin-bottom: 18px; flex-wrap: wrap;
+}
+.slide-head .id {
+  font-family: "DM Mono", monospace; font-size: 11px;
+  color: var(--p2); letter-spacing: 0.08em; text-transform: uppercase;
+}
+.slide-head .title {
+  font-family: "Space Grotesk", sans-serif; font-size: 22px;
+  font-weight: 700; color: var(--ink); letter-spacing: -0.01em;
+}
+.slide-head .topic {
+  margin-left: auto;
+  font-family: "DM Mono", monospace; font-size: 10px;
+  letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink);
+  border: 1.5px solid var(--ink); padding: 2px 8px; background: var(--hi);
+}
+.slide-cells {
+  display: grid; grid-template-columns: 1.4fr 1fr 1fr; gap: 14px;
+}
+.sc {
+  border: 2px solid var(--ink); background: var(--paper-2); padding: 14px 16px;
+}
+.sc.feat { border-width: 3px; }
+.sc .l {
+  font-family: "DM Mono", monospace; font-size: 9.5px;
+  letter-spacing: 0.09em; text-transform: uppercase; color: var(--p2);
+}
+.sc .v {
+  font-family: "Space Grotesk", sans-serif; font-size: 32px;
+  font-weight: 700; color: var(--ink); line-height: 1.1; margin-top: 4px;
+}
+.sc.feat .v { font-size: 44px; color: var(--p1); }
+.sc .x {
+  font-family: "Space Grotesk", sans-serif; font-size: 13px;
+  font-weight: 500; color: var(--p2); margin-top: 2px;
+  font-feature-settings: "tnum" 1;
+}
+
+/* ---------- D-løft: insight + 6 KPI + sparkline ---------- */
+.slide-insight {
+  display: flex; gap: 10px; align-items: flex-start;
+  padding: 10px 14px; margin: 0 0 16px;
+  background: var(--paper-2); border: 1.5px solid var(--hair);
+  border-left: 3px solid var(--p1);
+  font-family: "Space Grotesk", sans-serif;
+  font-size: 14.5px; font-weight: 500; color: var(--ink);
+  line-height: 1.45;
+}
+.slide-insight::before {
+  content: "\201C";
+  font-family: "Space Grotesk", sans-serif;
+  font-size: 22px; font-weight: 700; color: var(--p1);
+  line-height: 0.7;
+}
+.slide-cells.pack {
+  grid-template-columns: repeat(4, 1fr);
+  grid-auto-rows: 1fr;
+  gap: 12px;
+}
+.slide-cells.pack .sc {
+  min-height: 110px; padding: 14px 16px;
+  display: flex; flex-direction: column; justify-content: space-between;
+}
+.slide-cells.pack .sc.feat { grid-column: span 2; }
+.slide-cells.pack .sc .v { font-size: 32px; margin-top: 4px; }
+.slide-cells.pack .sc.feat .v { font-size: 44px; color: var(--p1); }
+
+.sc .l { display: flex; align-items: center; gap: 6px; }
+.sc .l .q {
+  display: inline-grid; place-content: center;
+  width: 13px; height: 13px; border: 1px solid var(--p2);
+  font-size: 9px; font-family: "Space Grotesk", sans-serif;
+  font-weight: 700; color: var(--p2); border-radius: 2px;
+  cursor: help; line-height: 1; position: relative;
+}
+.sc .l .q .qtip {
+  position: absolute; bottom: calc(100% + 6px); left: 50%;
+  transform: translateX(-50%);
+  background: var(--ink); color: var(--paper);
+  padding: 7px 10px; font-size: 11.5px; font-weight: 400;
+  font-family: "Space Grotesk", sans-serif; line-height: 1.4;
+  width: 220px; text-align: left; border: 2px solid var(--ink);
+  box-shadow: 3px 3px 0 var(--p1);
+  letter-spacing: 0; text-transform: none;
+  opacity: 0; pointer-events: none; transition: opacity 0.15s ease;
+  z-index: 10;
+}
+.sc .l .q:hover .qtip,
+.sc .l .q:focus .qtip { opacity: 1; }
+
+.slide-spark {
+  margin-top: 14px; border: 1.5px solid var(--hair);
+  background: var(--paper-2); padding: 8px 12px;
+  height: 60px; position: relative;
+}
+.slide-spark .lab {
+  position: absolute; top: 6px; left: 12px;
+  font-family: "DM Mono", monospace; font-size: 9.5px;
+  letter-spacing: 0.08em; color: var(--p2); text-transform: uppercase;
+}
+.slide-spark .rng {
+  position: absolute; bottom: 6px; right: 12px;
+  font-family: "DM Mono", monospace; font-size: 9.5px;
+  color: var(--p2); font-feature-settings: "tnum" 1;
+}
+.slide-spark svg { width: 100%; height: 100%; display: block; }
+
+.sw-dots {
+  display: flex; justify-content: center; gap: 8px;
+  padding: 14px 0 18px; background: var(--paper);
+}
+.sw-dots button {
+  width: 9px; height: 9px; border: 1.5px solid var(--ink);
+  background: transparent; cursor: pointer; padding: 0;
+}
+.sw-dots button.is-active { background: var(--ink); }
+.sw-dots button:focus-visible { outline: 2px solid var(--ano); outline-offset: 3px; }
+
+.showcase-skel {
+  margin: 0 auto; max-width: 920px; min-height: 320px;
+  border: 2px solid var(--hair); background: var(--paper-2);
+  display: flex; align-items: center; justify-content: center;
+  font-family: "DM Mono", monospace; font-size: 13px; color: var(--p2);
+}
+.showcase-fallback {
+  text-align: center; padding: 40px 24px;
+  font-family: "Space Grotesk", sans-serif;
+}
+.showcase-fallback a { color: var(--p1); font-weight: 600; }
+
+/* ---------- feature-grid ---------- */
+.feat-grid {
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px;
+  padding: 40px 0;
+}
+.feat-card {
+  border: 2px solid var(--ink); background: var(--paper-2); padding: 28px 24px;
+}
+.feat-card .ic {
+  width: 36px; height: 36px; background: var(--p1); color: #fff;
+  border: 2px solid var(--ink); display: flex; align-items: center; justify-content: center;
+  font-family: "DM Mono", monospace; font-weight: 700; font-size: 16px; margin-bottom: 16px;
+}
+.feat-card.ic-hi .ic { background: var(--hi); color: var(--ink); }
+.feat-card.ic-ano .ic { background: var(--ano-deep); color: #fff; }
+.feat-card h3 {
+  font-family: "Space Grotesk", sans-serif; font-size: 19px;
+  font-weight: 600; margin: 0 0 10px;
+}
+.feat-card p { font-size: 14px; line-height: 1.55; color: var(--p2); margin: 0; }
+
+/* ---------- how-it-works ---------- */
+.how-works {
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px;
+  padding: 40px 0; align-items: stretch;
+}
+.how-card {
+  border: 2px solid var(--ink); background: var(--paper-2);
+  padding: 20px; position: relative;
+}
+.how-card .step {
+  font-family: "DM Mono", monospace; font-size: 11px;
+  letter-spacing: 0.1em; background: var(--hi); color: var(--ink);
+  border: 2px solid var(--ink); padding: 2px 9px;
+  display: inline-block; margin-bottom: 12px; font-weight: 700;
+}
+.how-card h3 {
+  font-family: "Space Grotesk", sans-serif; font-size: 17px;
+  font-weight: 600; margin: 0 0 6px;
+}
+.how-card p {
+  font-family: "Space Grotesk", sans-serif; font-size: 13px;
+  color: var(--p2); line-height: 1.5; margin: 0;
+}
+.how-card .arrow {
+  position: absolute; right: -22px; top: 50%;
+  transform: translateY(-50%);
+  font-family: "DM Mono", monospace; font-size: 24px;
+  color: var(--p2); z-index: 2;
+}
+
+/* ---------- CTA-band ---------- */
+.cta-band {
+  padding: 60px 32px; text-align: center;
+  background: var(--paper-2); border: 2px solid var(--ink);
+  margin: 40px 0 60px;
+}
+.cta-band .eyebrow {
+  font-family: "DM Mono", monospace; font-size: 11px;
+  letter-spacing: 0.12em; color: var(--p2); text-transform: uppercase;
+  margin-bottom: 16px; font-weight: 700;
+}
+.cta-band .big-btn {
+  display: inline-flex; align-items: center; gap: 10px;
+  background: var(--ano-deep); color: #fff;
+  border: 2px solid var(--ink); box-shadow: 6px 6px 0 var(--ink);
+  padding: 18px 32px; font-family: "Space Grotesk", sans-serif;
+  font-weight: 700; font-size: 18px; text-decoration: none;
+  transition: transform 0.15s ease;
+}
+.cta-band .big-btn:hover { transform: translate(-2px, -2px); box-shadow: 8px 8px 0 var(--ink); }
+
+/* ---------- footer ---------- */
+.landing-foot {
+  padding: 28px 0; border-top: 2px solid var(--ink);
+}
+.landing-foot .links {
+  display: flex; gap: 24px; flex-wrap: wrap; justify-content: center;
+}
+.landing-foot .links a {
+  font-family: "DM Mono", monospace; font-size: 12px;
+  color: var(--p2); text-decoration: none;
+  border-bottom: 1px solid var(--hair); padding-bottom: 1px;
+  letter-spacing: 0.04em;
+}
+.landing-foot .links a:hover { color: var(--ink); border-color: var(--ink); }
+
+/* ---------- responsive ---------- */
+@media (max-width: 980px) {
+  .feat-grid, .how-works { grid-template-columns: 1fr; }
+  .how-card .arrow { display: none; }
+}
+@media (max-width: 760px) {
+  .slide-cells.pack { grid-template-columns: repeat(2, 1fr); }
+  .slide-cells.pack .sc.feat { grid-column: span 2; }
+}
+@media (max-width: 680px) {
+  .landing { padding: 0 24px; }
+  .landing-hero { padding: 48px 0 40px; }
+  .slide-cells { grid-template-columns: 1fr; }
+  .sw-body { padding: 20px 22px; }
+  .slide { inset: 20px 22px; }
+}
+@media (max-width: 520px) {
+  .slide-cells.pack { grid-template-columns: 1fr; }
+  .slide-cells.pack .sc.feat { grid-column: span 1; }
+  .slide-spark { display: none; }
+}
